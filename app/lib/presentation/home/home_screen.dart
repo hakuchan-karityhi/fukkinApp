@@ -17,6 +17,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _pageController = PageController();
+  int _panelIndex = 0;
 
   @override
   void dispose() {
@@ -25,6 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _goToPanel(int index) {
+    setState(() => _panelIndex = index);
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 250),
@@ -82,29 +84,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final targetSeconds = ref.watch(targetSecondsProvider) ??
                     selectedPlank.defaultSeconds;
 
-                return PageView(
-                  controller: _pageController,
+                return Column(
                   children: [
-                    CharacterPanel(
-                      progressAsync: progressAsync,
-                      onNext: () => _goToPanel(1),
-                    ),
-                    ExercisePanel(
-                      plankTypes: plankTypes,
-                      selectedIndex: clampedIndex,
-                      targetSeconds: targetSeconds,
-                      streakAsync: streakAsync,
-                      onPreviousPanel: () => _goToPanel(0),
-                      onSelectPlank: (index) {
-                        ref.read(selectedPlankIndexProvider.notifier).state =
-                            index;
-                        ref.read(targetSecondsProvider.notifier).state =
-                            plankTypes[index].defaultSeconds;
-                      },
-                      onTargetSecondsChanged: (seconds) {
-                        ref.read(targetSecondsProvider.notifier).state = seconds;
-                      },
-                      onStart: () => _startPlank(selectedPlank, targetSeconds),
+                    _PanelIndicator(currentIndex: _panelIndex),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: (index) =>
+                            setState(() => _panelIndex = index),
+                        children: [
+                          CharacterPanel(
+                            progressAsync: progressAsync,
+                            onNext: () => _goToPanel(1),
+                          ),
+                          ExercisePanel(
+                            plankTypes: plankTypes,
+                            selectedIndex: clampedIndex,
+                            targetSeconds: targetSeconds,
+                            streakAsync: streakAsync,
+                            onPreviousPanel: () => _goToPanel(0),
+                            onSelectPlank: (index) {
+                              ref
+                                  .read(selectedPlankIndexProvider.notifier)
+                                  .state = index;
+                              ref.read(targetSecondsProvider.notifier).state =
+                                  plankTypes[index].defaultSeconds;
+                            },
+                            onTargetSecondsChanged: (seconds) {
+                              ref.read(targetSecondsProvider.notifier).state =
+                                  seconds;
+                            },
+                            onStart: () =>
+                                _startPlank(selectedPlank, targetSeconds),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 );
@@ -115,6 +130,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PanelIndicator extends StatelessWidget {
+  const _PanelIndicator({required this.currentIndex});
+
+  final int currentIndex;
+
+  static const _labels = ["かんちゃん", "種目"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(_labels.length, (index) {
+        final isActive = index == currentIndex;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey.shade300,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                _labels[index],
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

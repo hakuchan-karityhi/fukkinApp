@@ -67,19 +67,15 @@ class ExercisePanel extends ConsumerWidget {
               children: [
                 _ArrowButton(
                   icon: Icons.chevron_left,
-                  onPressed: onPreviousPanel,
+                  onPressed: selectedIndex > 0
+                      ? () => onSelectPlank(selectedIndex - 1)
+                      : onPreviousPanel,
                 ),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _PlankCarouselControls(
-                        canGoPrevious: selectedIndex > 0,
-                        canGoNext: selectedIndex < plankTypes.length - 1,
-                        onPrevious: () => onSelectPlank(selectedIndex - 1),
-                        onNext: () => onSelectPlank(selectedIndex + 1),
-                        child: _PlankIllustration(plankType: plank),
-                      ),
+                      _PlankIllustration(plankType: plank),
                       const SizedBox(height: 12),
                       Text(
                         plank.name,
@@ -163,40 +159,6 @@ class ExercisePanel extends ConsumerWidget {
           const SizedBox(height: 8),
         ],
       ),
-    );
-  }
-}
-
-class _PlankCarouselControls extends StatelessWidget {
-  const _PlankCarouselControls({
-    required this.canGoPrevious,
-    required this.canGoNext,
-    required this.onPrevious,
-    required this.onNext,
-    required this.child,
-  });
-
-  final bool canGoPrevious;
-  final bool canGoNext;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          onPressed: canGoPrevious ? onPrevious : null,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        child,
-        IconButton(
-          onPressed: canGoNext ? onNext : null,
-          icon: const Icon(Icons.chevron_right),
-        ),
-      ],
     );
   }
 }
