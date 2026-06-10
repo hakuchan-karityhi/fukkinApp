@@ -7,6 +7,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("ふっきん"), findsOneWidget);
-    expect(find.text("開発基盤 Ready"), findsOneWidget);
+    expect(find.textContaining("日次EXP上限"), findsOneWidget);
   });
 }
