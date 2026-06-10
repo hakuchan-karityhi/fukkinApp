@@ -4,12 +4,12 @@ import "package:fukkin/infrastructure/master/plank_type_repository.dart";
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test("plank_types.json から5種目を読み込める", () async {
+  test("plank_types.json から7種目を読み込める", () async {
     final repo = AssetPlankTypeRepository();
     final betaTypes = await repo.getAll(betaMode: true);
     final mvpTypes = await repo.getAll(betaMode: false);
 
-    expect(betaTypes.length, 5);
+    expect(betaTypes.length, 7);
     expect(mvpTypes.length, 2);
     expect(betaTypes.map((t) => t.id), [
       "PK-01",
@@ -17,6 +17,8 @@ void main() {
       "PK-03",
       "PK-04",
       "PK-05",
+      "PK-06",
+      "PK-07",
     ]);
   });
 

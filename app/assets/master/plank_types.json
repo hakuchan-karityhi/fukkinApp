@@ -65,6 +65,32 @@
       "recommendedSecondsMin": 15,
       "recommendedSecondsMax": 30,
       "isPerSide": true
+    },
+    {
+      "id": "PK-06",
+      "name": "プランクジャック",
+      "difficulty": 2,
+      "expMultiplier": 1.2,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "plank_jack",
+      "formImageAsset": "assets/character/pk06_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-07",
+      "name": "スパイダープランク",
+      "difficulty": 3,
+      "expMultiplier": 1.3,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "spider_plank",
+      "formImageAsset": "assets/character/pk07_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
     }
   ]
 }
