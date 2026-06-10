@@ -33,6 +33,20 @@ void main() {
     expect(sidePlank.expMultiplier, 1.3);
   });
 
+  test("PK-08, PK-09 が β で読み込める", () async {
+    final repo = AssetPlankTypeRepository();
+    final legLift = await repo.getById("PK-08");
+    final shoulderTap = await repo.getById("PK-09");
+
+    expect(legLift, isNotNull);
+    expect(legLift!.name, "レッグリフトプランク");
+    expect(legLift.expMultiplier, 1.4);
+
+    expect(shoulderTap, isNotNull);
+    expect(shoulderTap!.name, "ショルダータッププランク");
+    expect(shoulderTap.expMultiplier, 1.5);
+  });
+
   test("PK-03 の倍率と難易度", () async {
     final repo = AssetPlankTypeRepository();
     final highPlank = await repo.getById("PK-03");
