@@ -25,6 +25,46 @@
       "formImageAsset": "assets/character/pk02_form.png",
       "recommendedSecondsMin": 30,
       "recommendedSecondsMax": 60
+    },
+    {
+      "id": "PK-03",
+      "name": "ハイプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.2,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "high_plank",
+      "formImageAsset": "assets/character/pk03_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 45
+    },
+    {
+      "id": "PK-04",
+      "name": "リバースプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.1,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "reverse_plank",
+      "formImageAsset": "assets/character/pk04_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-05",
+      "name": "サイドプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.3,
+      "defaultSeconds": 20,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "side_plank",
+      "formImageAsset": "assets/character/pk05_form.png",
+      "recommendedSecondsMin": 15,
+      "recommendedSecondsMax": 30,
+      "isPerSide": true
     }
   ]
 }

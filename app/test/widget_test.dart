@@ -4,9 +4,10 @@ import "package:fukkin/app/app.dart";
 void main() {
   testWidgets("ふっきんアプリが起動する", (WidgetTester tester) async {
     await tester.pumpWidget(const FukkinApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text("ふっきん"), findsOneWidget);
-    expect(find.text("開発基盤 Ready"), findsOneWidget);
+    expect(find.text("home"), findsOneWidget);
+    expect(find.text("記録"), findsOneWidget);
+    expect(find.text("設定"), findsOneWidget);
   });
 }
