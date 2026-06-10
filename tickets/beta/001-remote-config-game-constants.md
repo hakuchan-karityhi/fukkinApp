@@ -7,7 +7,7 @@
 | フェーズ | β |
 | 要件ID | —（`03-phase.md` §7 技術方針） |
 | 優先度 | Must |
-| 依存 | MVP 完了 |
+| 依存 | 000（Flutter 基盤）, MVP 完了 |
 | 参照 | `01-design/03-phase.md` §4.3, §7 / `02-youken.md` §5 |
 
 ## 概要

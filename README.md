@@ -52,9 +52,20 @@ developBase/
 
 ## 開発
 
-1, 01-designで企画、設計をする
-2, cursorに開発な必要なブランチを全て切ってと伝える（main,develop,mvp,beta,release）
-3, 01-yokenからtickets/mvpに必要なチケットをきるように伝える
+1. `01-design` で企画・設計をする
+2. Cursor に基幹ブランチの作成を依頼する（`main`, `develop`, `mvp`, `beta`, `release`）
+3. `01-design/02-youken.md` から `tickets/mvp` / `tickets/beta` にチケットを切る
+4. チケットを実装して PR まで進める → Cursor コマンド **`/implement-ticket`**
+
+### チケット実装コマンド
+
+```
+/implement-ticket tickets/beta/002-plank-types-phase1.md
+/implement-ticket beta/002
+```
+
+`develop` から feature ブランチを切り、実装・コミット・`develop` 向け PR 作成まで自動で進める。  
+詳細: `.cursor/skills/implement-ticket/SKILL.md`
 
 ## ライセンス
 
