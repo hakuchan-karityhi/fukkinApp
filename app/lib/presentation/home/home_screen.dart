@@ -96,8 +96,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 return Column(
                   children: [
-                    _PanelIndicator(currentPage: _currentPage),
-                    const SizedBox(height: 8),
                     if (isExercisePage)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -160,55 +158,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PanelIndicator extends StatelessWidget {
-  const _PanelIndicator({required this.currentPage});
-
-  final int currentPage;
-
-  static const _labels = ["かんちゃん", "種目"];
-
-  @override
-  Widget build(BuildContext context) {
-    final panelIndex = currentPage == 0 ? 0 : 1;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_labels.length, (index) {
-        final isActive = index == panelIndex;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isActive
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.shade300,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _labels[index],
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  color: isActive
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
     );
   }
 }
