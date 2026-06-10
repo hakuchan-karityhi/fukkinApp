@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../../app/providers.dart";
 import "../../../domain/models/plank_type.dart";
 import "../../../domain/models/streak_state.dart";
+import "../../widgets/plank_pose_view.dart";
 
 class ExercisePanel extends ConsumerWidget {
   const ExercisePanel({
@@ -81,7 +82,7 @@ class ExercisePanel extends ConsumerWidget {
                         onNext: () => onSelectPlank(
                           (selectedIndex + 1) % plankTypes.length,
                         ),
-                        child: _PlankIllustration(plankType: plank),
+                        child: PlankPoseView(plankType: plank, size: 72),
                       ),
                       const SizedBox(height: 8),
                       _CarouselIndicator(
@@ -232,40 +233,6 @@ class _CarouselIndicator extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _PlankIllustration extends StatelessWidget {
-  const _PlankIllustration({required this.plankType});
-
-  final PlankType plankType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.accessibility_new,
-            size: 48,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            plankType.id,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
     );
   }
 }
