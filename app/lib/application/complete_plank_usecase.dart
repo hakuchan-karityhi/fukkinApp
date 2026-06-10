@@ -1,12 +1,14 @@
 import "../domain/models/plank_result.dart";
 import "../domain/models/streak_state.dart";
 import "../domain/models/workout_record.dart";
+import "../domain/repositories/milestone_repository.dart";
 import "../domain/repositories/plank_type_repository.dart";
 import "../domain/repositories/streak_repository.dart";
 import "../domain/repositories/user_progress_repository.dart";
 import "../domain/repositories/workout_repository.dart";
 import "../domain/services/exp_calculator.dart";
 import "../domain/services/level_service.dart";
+import "../domain/services/milestone_service.dart";
 import "../domain/services/streak_service.dart";
 
 class CompletePlankUseCase {
@@ -15,24 +17,30 @@ class CompletePlankUseCase {
     required UserProgressRepository userProgressRepository,
     required StreakRepository streakRepository,
     required WorkoutRepository workoutRepository,
+    required MilestoneRepository milestoneRepository,
     required ExpCalculator expCalculator,
     required StreakService streakService,
     required LevelService levelService,
+    required MilestoneService milestoneService,
   })  : _plankTypeRepository = plankTypeRepository,
         _userProgressRepository = userProgressRepository,
         _streakRepository = streakRepository,
         _workoutRepository = workoutRepository,
+        _milestoneRepository = milestoneRepository,
         _expCalculator = expCalculator,
         _streakService = streakService,
-        _levelService = levelService;
+        _levelService = levelService,
+        _milestoneService = milestoneService;
 
   final PlankTypeRepository _plankTypeRepository;
   final UserProgressRepository _userProgressRepository;
   final StreakRepository _streakRepository;
   final WorkoutRepository _workoutRepository;
+  final MilestoneRepository _milestoneRepository;
   final ExpCalculator _expCalculator;
   final StreakService _streakService;
   final LevelService _levelService;
+  final MilestoneService _milestoneService;
 
   Future<PlankResult> execute({
     required String plankTypeId,
@@ -108,6 +116,19 @@ class CompletePlankUseCase {
       ),
     );
 
+    final targets = await _milestoneRepository.getTargets();
+    final achieved = await _milestoneRepository.getAchieved();
+    final milestoneReached = _milestoneService.detectAchievement(
+      streakAfter: streak.currentStreak,
+      streakIncreased: streakIncreased,
+      targets: targets,
+      achieved: achieved,
+      achievedAt: completedAt,
+    );
+    if (milestoneReached != null) {
+      await _milestoneRepository.addAchievement(milestoneReached);
+    }
+
     return PlankResult(
       earnedExp: earnedExp,
       baseExp: baseExp,
@@ -120,6 +141,7 @@ class CompletePlankUseCase {
       levelAfter: newLevel,
       levelUp: newLevel > previousLevel,
       absStageAfter: newAbsStage,
+      milestoneReached: milestoneReached,
     );
   }
 

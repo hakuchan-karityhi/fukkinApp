@@ -42,8 +42,32 @@ class WorkoutRecordEntries extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class MilestoneTargetEntries extends Table {
+  IntColumn get days => integer()();
+  TextColumn get title => text()();
+  BoolColumn get isBuiltin => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {days};
+}
+
+class MilestoneAchievementEntries extends Table {
+  IntColumn get days => integer()();
+  TextColumn get title => text()();
+  DateTimeColumn get achievedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {days};
+}
+
 @DriftDatabase(
-  tables: [UserProgressEntries, StreakStateEntries, WorkoutRecordEntries],
+  tables: [
+    UserProgressEntries,
+    StreakStateEntries,
+    WorkoutRecordEntries,
+    MilestoneTargetEntries,
+    MilestoneAchievementEntries,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -51,7 +75,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.createTable(milestoneTargetEntries);
+            await m.createTable(milestoneAchievementEntries);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {

@@ -47,6 +47,23 @@ class DriftWorkoutRepository implements WorkoutRepository {
         .toList();
   }
 
+  @override
+  Future<Set<DateTime>> getWorkoutDatesInMonth(int year, int month) async {
+    final start = DateTime(year, month, 1);
+    final end = DateTime(year, month + 1, 1);
+    final rows = await (_db.select(_db.workoutRecordEntries)
+          ..where(
+            (t) =>
+                t.date.isBiggerOrEqualValue(_dateKey(start)) &
+                t.date.isSmallerThanValue(_dateKey(end)),
+          ))
+        .get();
+
+    return rows
+        .map((row) => DateTime.parse(row.date))
+        .toSet();
+  }
+
   String _dateKey(DateTime date) =>
       DateTime(date.year, date.month, date.day).toIso8601String();
 }

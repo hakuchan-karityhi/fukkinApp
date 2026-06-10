@@ -9,6 +9,10 @@ import "../domain/repositories/plank_type_repository.dart";
 import "../domain/repositories/streak_repository.dart";
 import "../domain/repositories/user_progress_repository.dart";
 import "../domain/repositories/workout_repository.dart";
+import "../domain/repositories/milestone_repository.dart";
+import "../domain/models/milestone.dart";
+import "../domain/services/milestone_service.dart";
+import "../infrastructure/local/milestone_repository.dart";
 import "../domain/repositories/character_dialogue_repository.dart";
 import "../domain/models/character_dialogues.dart";
 import "../domain/services/character_dialogue_selector.dart";
@@ -82,6 +86,23 @@ final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
   return DriftWorkoutRepository(ref.watch(appDatabaseProvider));
 });
 
+final milestoneRepositoryProvider = Provider<MilestoneRepository>((ref) {
+  return DriftMilestoneRepository(ref.watch(appDatabaseProvider));
+});
+
+final milestoneServiceProvider = Provider<MilestoneService>((ref) {
+  return const MilestoneService();
+});
+
+final milestoneTargetsProvider = FutureProvider<List<MilestoneTarget>>((ref) async {
+  return ref.watch(milestoneRepositoryProvider).getTargets();
+});
+
+final milestoneAchievementsProvider =
+    FutureProvider<List<MilestoneAchievement>>((ref) async {
+  return ref.watch(milestoneRepositoryProvider).getAchieved();
+});
+
 final characterDialogueRepositoryProvider =
     Provider<CharacterDialogueRepository>(
   (ref) => AssetCharacterDialogueRepository(),
@@ -122,9 +143,11 @@ final completePlankUseCaseProvider = Provider<CompletePlankUseCase?>((ref) {
     userProgressRepository: ref.watch(userProgressRepositoryProvider),
     streakRepository: ref.watch(streakRepositoryProvider),
     workoutRepository: ref.watch(workoutRepositoryProvider),
+    milestoneRepository: ref.watch(milestoneRepositoryProvider),
     expCalculator: expCalculator,
     streakService: streakService,
     levelService: levelService,
+    milestoneService: ref.watch(milestoneServiceProvider),
   );
 });
 

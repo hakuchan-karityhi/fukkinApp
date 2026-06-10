@@ -6,6 +6,8 @@ import "package:fukkin/domain/services/exp_calculator.dart";
 import "package:fukkin/domain/services/level_service.dart";
 import "package:fukkin/domain/services/streak_service.dart";
 import "package:fukkin/infrastructure/local/app_database.dart";
+import "package:fukkin/domain/services/milestone_service.dart";
+import "package:fukkin/infrastructure/local/milestone_repository.dart";
 import "package:fukkin/infrastructure/local/streak_repository.dart";
 import "package:fukkin/infrastructure/local/user_progress_repository.dart";
 import "package:fukkin/infrastructure/local/workout_repository.dart";
@@ -25,9 +27,11 @@ void main() {
       userProgressRepository: DriftUserProgressRepository(db),
       streakRepository: DriftStreakRepository(db),
       workoutRepository: DriftWorkoutRepository(db),
+      milestoneRepository: DriftMilestoneRepository(db),
       expCalculator: ExpCalculator(constants),
       streakService: StreakService(constants),
       levelService: LevelService(constants),
+      milestoneService: const MilestoneService(),
     );
   });
 
@@ -99,5 +103,31 @@ void main() {
     expect(records.length, 1);
     expect(records.first.plankTypeId, "PK-04");
     expect(records.first.targetSeconds, 25);
+  });
+
+  test("3日目ストリークでマイルストーン達成が返る", () async {
+    await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 9, 12),
+    );
+    await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 10, 12),
+    );
+
+    final result = await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 12),
+    );
+
+    expect(result.streakAfter, 3);
+    expect(result.milestoneReached?.days, 3);
+    expect(result.milestoneReached?.title, "習慣の芽");
+
+    final achieved = await DriftMilestoneRepository(db).getAchieved();
+    expect(achieved.any((item) => item.days == 3), isTrue);
   });
 }
