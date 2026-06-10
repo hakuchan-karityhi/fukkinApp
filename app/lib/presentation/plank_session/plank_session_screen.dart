@@ -6,6 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../result/plank_result_screen.dart";
+import "../widgets/plank_pose_view.dart";
 
 class PlankSessionScreen extends ConsumerStatefulWidget {
   const PlankSessionScreen({
@@ -100,6 +101,12 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            PlankPoseView(
+              plankType: widget.plankType,
+              size: 80,
+              showLabel: false,
+            ),
+            const SizedBox(height: 16),
             Text(
               "$_remainingSeconds",
               style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),

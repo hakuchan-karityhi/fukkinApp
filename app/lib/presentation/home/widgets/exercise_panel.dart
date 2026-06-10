@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../../app/providers.dart";
 import "../../../domain/models/plank_type.dart";
 import "../../../domain/models/streak_state.dart";
+import "../../widgets/plank_pose_view.dart";
 
 class PlankDetailPanel extends ConsumerWidget {
   const PlankDetailPanel({
@@ -45,7 +46,7 @@ class PlankDetailPanel extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _PlankIllustration(plankType: plank),
+          PlankPoseView(plankType: plank, size: 72),
           const SizedBox(height: 12),
           Text(
             plank.name,
@@ -178,40 +179,6 @@ class HomeNavArrowButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
         child: Icon(icon),
-      ),
-    );
-  }
-}
-
-class _PlankIllustration extends StatelessWidget {
-  const _PlankIllustration({required this.plankType});
-
-  final PlankType plankType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.accessibility_new,
-            size: 48,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            plankType.id,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
       ),
     );
   }
