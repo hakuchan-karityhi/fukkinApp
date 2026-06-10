@@ -123,7 +123,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               onPageChanged: (page) =>
                                   _onPageChanged(page, plankTypes),
                               children: [
-                                CharacterPanel(progressAsync: progressAsync),
+                                CharacterPanel(
+                                  progressAsync: progressAsync,
+                                  streakAsync: streakAsync,
+                                ),
                                 for (var i = 0; i < plankTypes.length; i++)
                                   PlankDetailPanel(
                                     plank: plankTypes[i],

@@ -9,6 +9,9 @@ import "../domain/repositories/plank_type_repository.dart";
 import "../domain/repositories/streak_repository.dart";
 import "../domain/repositories/user_progress_repository.dart";
 import "../domain/repositories/workout_repository.dart";
+import "../domain/repositories/character_dialogue_repository.dart";
+import "../domain/models/character_dialogues.dart";
+import "../domain/services/character_dialogue_selector.dart";
 import "../domain/services/exp_calculator.dart";
 import "../domain/services/level_service.dart";
 import "../domain/services/penalty_service.dart";
@@ -19,6 +22,7 @@ import "../infrastructure/local/streak_repository.dart";
 import "../infrastructure/local/user_progress_repository.dart";
 import "../infrastructure/local/workout_repository.dart";
 import "../infrastructure/master/plank_type_repository.dart";
+import "../infrastructure/master/character_dialogue_repository.dart";
 import "../infrastructure/remote_config/remote_config_game_constants_repository.dart";
 
 const betaMode = true;
@@ -76,6 +80,20 @@ final streakRepositoryProvider = Provider<StreakRepository>((ref) {
 
 final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
   return DriftWorkoutRepository(ref.watch(appDatabaseProvider));
+});
+
+final characterDialogueRepositoryProvider =
+    Provider<CharacterDialogueRepository>(
+  (ref) => AssetCharacterDialogueRepository(),
+);
+
+final characterDialoguesProvider = FutureProvider<CharacterDialogues>((ref) async {
+  return ref.watch(characterDialogueRepositoryProvider).load();
+});
+
+final characterDialogueSelectorProvider =
+    Provider<CharacterDialogueSelector>((ref) {
+  return const CharacterDialogueSelector();
 });
 
 final plankTypesProvider = FutureProvider<List<PlankType>>((ref) async {

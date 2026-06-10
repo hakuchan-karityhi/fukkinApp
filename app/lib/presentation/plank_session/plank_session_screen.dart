@@ -6,6 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../result/plank_result_screen.dart";
+import "../widgets/dialogue_bubble.dart";
 import "../widgets/plank_pose_view.dart";
 
 class PlankSessionScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,7 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
   Timer? _timer;
   bool _isRunning = false;
   bool _isCompleting = false;
+  int _cheerRotation = 0;
 
   @override
   void initState() {
@@ -57,7 +59,12 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
         });
         return;
       }
-      setState(() => _remainingSeconds--);
+      setState(() {
+        _remainingSeconds--;
+        if (_remainingSeconds % 12 == 0) {
+          _cheerRotation++;
+        }
+      });
     });
   }
 
@@ -92,8 +99,23 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
     }
   }
 
+  String? _buildCheerText() {
+    final dialogues = ref.watch(characterDialoguesProvider).valueOrNull;
+    final streak = ref.watch(streakStateProvider).valueOrNull;
+    if (dialogues == null || streak == null) return null;
+
+    return ref.watch(characterDialogueSelectorProvider).sessionCheer(
+          master: dialogues,
+          currentStreak: streak.currentStreak,
+          now: DateTime.now(),
+          rotationIndex: _cheerRotation,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cheerText = _buildCheerText();
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.plankType.name)),
       body: Padding(
@@ -106,6 +128,10 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
               size: 80,
               showLabel: false,
             ),
+            if (cheerText != null) ...[
+              const SizedBox(height: 12),
+              DialogueBubble(text: cheerText),
+            ],
             const SizedBox(height: 16),
             Text(
               "$_remainingSeconds",
