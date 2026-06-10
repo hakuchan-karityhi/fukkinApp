@@ -25,6 +25,22 @@ class DriftWorkoutRepository implements WorkoutRepository {
   }
 
   @override
+  Future<List<WorkoutRecord>> getInMonth(int year, int month) async {
+    final startKey = _dateKey(DateTime(year, month, 1));
+    final endKey = _dateKey(DateTime(year, month + 1, 0));
+
+    final rows = await (_db.select(_db.workoutRecordEntries)
+          ..where((t) => t.date.isBetweenValues(startKey, endKey))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.date),
+            (t) => OrderingTerm.asc(t.completedAt),
+          ]))
+        .get();
+
+    return rows.map(_rowToRecord).toList();
+  }
+
+  @override
   Future<List<WorkoutRecord>> getByDate(DateTime date) async {
     final key = _dateKey(date);
     final rows = await (_db.select(_db.workoutRecordEntries)
@@ -32,20 +48,18 @@ class DriftWorkoutRepository implements WorkoutRepository {
           ..orderBy([(t) => OrderingTerm.asc(t.completedAt)]))
         .get();
 
-    return rows
-        .map(
-          (row) => WorkoutRecord(
-            id: row.id,
-            date: DateTime.parse(row.date),
-            plankTypeId: row.plankTypeId,
-            targetSeconds: row.targetSeconds,
-            earnedExp: row.earnedExp,
-            completedAt: row.completedAt,
-            sessionIndexOfDay: row.sessionIndexOfDay,
-          ),
-        )
-        .toList();
+    return rows.map(_rowToRecord).toList();
   }
+
+  WorkoutRecord _rowToRecord(WorkoutRecordEntry row) => WorkoutRecord(
+        id: row.id,
+        date: DateTime.parse(row.date),
+        plankTypeId: row.plankTypeId,
+        targetSeconds: row.targetSeconds,
+        earnedExp: row.earnedExp,
+        completedAt: row.completedAt,
+        sessionIndexOfDay: row.sessionIndexOfDay,
+      );
 
   String _dateKey(DateTime date) =>
       DateTime(date.year, date.month, date.day).toIso8601String();

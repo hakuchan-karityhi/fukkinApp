@@ -42,7 +42,7 @@ class PlankResultScreen extends StatelessWidget {
             const Spacer(),
             FilledButton(
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(context, rootNavigator: true).pop(true);
               },
               child: const Text("ホームへ"),
             ),

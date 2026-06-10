@@ -4,6 +4,7 @@ import "../domain/models/game_constants.dart";
 import "../domain/models/plank_type.dart";
 import "../domain/models/streak_state.dart";
 import "../domain/models/user_progress.dart";
+import "../domain/models/workout_record.dart";
 import "../domain/repositories/game_constants_repository.dart";
 import "../domain/repositories/plank_type_repository.dart";
 import "../domain/repositories/streak_repository.dart";
@@ -89,6 +90,13 @@ final userProgressProvider = FutureProvider<UserProgress>((ref) async {
 
 final streakStateProvider = FutureProvider<StreakState>((ref) async {
   return ref.watch(streakRepositoryProvider).get();
+});
+
+final workoutRecordsForMonthProvider =
+    FutureProvider.family<List<WorkoutRecord>, DateTime>((ref, month) async {
+  return ref
+      .watch(workoutRepositoryProvider)
+      .getInMonth(month.year, month.month);
 });
 
 final completePlankUseCaseProvider = Provider<CompletePlankUseCase?>((ref) {

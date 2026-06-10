@@ -77,7 +77,7 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
 
       if (!mounted) return;
 
-      await Navigator.of(context).pushReplacement(
+      await Navigator.of(context, rootNavigator: true).pushReplacement(
         MaterialPageRoute(
           builder: (_) => PlankResultScreen(result: result),
         ),

@@ -33,8 +33,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _startPlank(PlankType plankType, int targetSeconds) async {
-    final result = await Navigator.of(context).push<dynamic>(
+    final result = await Navigator.of(context, rootNavigator: true).push<dynamic>(
       MaterialPageRoute(
+        fullscreenDialog: true,
         builder: (_) => PlankSessionScreen(
           plankType: plankType,
           targetSeconds: targetSeconds,
@@ -45,6 +46,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (result != null && mounted) {
       ref.invalidate(userProgressProvider);
       ref.invalidate(streakStateProvider);
+      final now = DateTime.now();
+      ref.invalidate(
+        workoutRecordsForMonthProvider(DateTime(now.year, now.month)),
+      );
     }
   }
 
