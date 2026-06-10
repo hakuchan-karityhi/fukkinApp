@@ -1,0 +1,25 @@
+Please analyze and plan the implementation for the GitHub issue: $ARGUMENTS.
+
+Follow these steps:
+
+1. Use `gh issue view` to get the issue details
+2. Understand the problem described in the issue
+3. Search the codebase for relevant files
+4. Plan the necessary changes to fix the issue
+5. **Create Subtickets Directory**
+   - Extract the issue number from $ARGUMENTS (e.g., "22" from issue #22)
+   - Create a directory named `<issue-number>-subtickets` in `docs/tickets/`
+   - Example: If issue number is "22", create `docs/tickets/22-subtickets/`
+   - Use the issue number from the issue (e.g., "22" → "22-subtickets")
+6. **Create Implementation Plan File**
+   - Create a markdown file in the subtickets directory with the name: `<original issue title>[実装計画].md`
+   - Example: If the original issue title is "CleanArchitecture基盤構築", create `docs/tickets/22-subtickets/022_CleanArchitecture基盤構築[実装計画].md`
+   - File name format: `<issue-number>_<original-issue-title>[実装計画].md`
+   - Sanitize the file name: remove special characters, replace spaces with underscores if needed
+   - Write the implementation plan content in Japanese
+   - **IMPORTANT**: At the beginning of the file, right after the title, include the issue number in the format: `# Issue #<issue-number>`
+   - Example: If issue number is "53", add `# Issue #53` as the second line
+   - **DO NOT** include "## 親Issue" section in the implementation plan file (this is only for sub-issue files created by 3.2-create-subissues.md)
+   - Include all implementation steps, dependencies, and details
+
+Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
