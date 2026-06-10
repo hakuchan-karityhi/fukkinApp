@@ -1,0 +1,30 @@
+{
+  "plankTypes": [
+    {
+      "id": "PK-01",
+      "name": "ベーシックプランク",
+      "difficulty": 1,
+      "expMultiplier": 1.0,
+      "defaultSeconds": 30,
+      "enabledInMvp": true,
+      "enabledInBeta": true,
+      "poseAssetId": "basic_plank",
+      "formImageAsset": "assets/character/pk01_form.png",
+      "recommendedSecondsMin": 30,
+      "recommendedSecondsMax": 60
+    },
+    {
+      "id": "PK-02",
+      "name": "ニープランク",
+      "difficulty": 1,
+      "expMultiplier": 0.9,
+      "defaultSeconds": 30,
+      "enabledInMvp": true,
+      "enabledInBeta": true,
+      "poseAssetId": "knee_plank",
+      "formImageAsset": "assets/character/pk02_form.png",
+      "recommendedSecondsMin": 30,
+      "recommendedSecondsMax": 60
+    }
+  ]
+}
