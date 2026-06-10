@@ -91,6 +91,32 @@
       "formImageAsset": "assets/character/pk07_form.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-08",
+      "name": "レッグリフトプランク",
+      "difficulty": 3,
+      "expMultiplier": 1.4,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "leg_lift_plank",
+      "formImageAsset": "assets/character/pk08_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-09",
+      "name": "ショルダータッププランク",
+      "difficulty": 3,
+      "expMultiplier": 1.5,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "shoulder_tap_plank",
+      "formImageAsset": "assets/character/pk09_form.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
     }
   ]
 }

@@ -74,11 +74,20 @@ class ExercisePanel extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _PlankCarouselControls(
-                        canGoPrevious: selectedIndex > 0,
-                        canGoNext: selectedIndex < plankTypes.length - 1,
-                        onPrevious: () => onSelectPlank(selectedIndex - 1),
-                        onNext: () => onSelectPlank(selectedIndex + 1),
+                        onPrevious: () => onSelectPlank(
+                          (selectedIndex - 1 + plankTypes.length) %
+                              plankTypes.length,
+                        ),
+                        onNext: () => onSelectPlank(
+                          (selectedIndex + 1) % plankTypes.length,
+                        ),
                         child: _PlankIllustration(plankType: plank),
+                      ),
+                      const SizedBox(height: 8),
+                      _CarouselIndicator(
+                        count: plankTypes.length,
+                        selectedIndex: selectedIndex,
+                        onDotTap: onSelectPlank,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -107,9 +116,9 @@ class ExercisePanel extends ConsumerWidget {
                 ),
                 _ArrowButton(
                   icon: Icons.chevron_right,
-                  onPressed: selectedIndex < plankTypes.length - 1
-                      ? () => onSelectPlank(selectedIndex + 1)
-                      : null,
+                  onPressed: () => onSelectPlank(
+                    (selectedIndex + 1) % plankTypes.length,
+                  ),
                 ),
               ],
             ),
@@ -169,15 +178,11 @@ class ExercisePanel extends ConsumerWidget {
 
 class _PlankCarouselControls extends StatelessWidget {
   const _PlankCarouselControls({
-    required this.canGoPrevious,
-    required this.canGoNext,
     required this.onPrevious,
     required this.onNext,
     required this.child,
   });
 
-  final bool canGoPrevious;
-  final bool canGoNext;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final Widget child;
@@ -187,16 +192,46 @@ class _PlankCarouselControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          onPressed: canGoPrevious ? onPrevious : null,
-          icon: const Icon(Icons.chevron_left),
-        ),
+        IconButton(onPressed: onPrevious, icon: const Icon(Icons.chevron_left)),
         child,
-        IconButton(
-          onPressed: canGoNext ? onNext : null,
-          icon: const Icon(Icons.chevron_right),
-        ),
+        IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
       ],
+    );
+  }
+}
+
+class _CarouselIndicator extends StatelessWidget {
+  const _CarouselIndicator({
+    required this.count,
+    required this.selectedIndex,
+    required this.onDotTap,
+  });
+
+  final int count;
+  final int selectedIndex;
+  final ValueChanged<int> onDotTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        final selected = index == selectedIndex;
+        return GestureDetector(
+          onTap: () => onDotTap(index),
+          child: Container(
+            width: selected ? 10 : 8,
+            height: selected ? 10 : 8,
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey.shade300,
+            ),
+          ),
+        );
+      }),
     );
   }
 }
