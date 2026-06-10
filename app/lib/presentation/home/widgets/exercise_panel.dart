@@ -83,12 +83,6 @@ class ExercisePanel extends ConsumerWidget {
                         ),
                         child: _PlankIllustration(plankType: plank),
                       ),
-                      const SizedBox(height: 8),
-                      _CarouselIndicator(
-                        count: plankTypes.length,
-                        selectedIndex: selectedIndex,
-                        onDotTap: onSelectPlank,
-                      ),
                       const SizedBox(height: 12),
                       Text(
                         plank.name,
@@ -111,6 +105,47 @@ class ExercisePanel extends ConsumerWidget {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Text("目標秒数"),
+                          Expanded(
+                            child: Slider(
+                              value: targetSeconds.toDouble(),
+                              min: _minSeconds.toDouble(),
+                              max: _maxSeconds.toDouble(),
+                              divisions: _maxSeconds - _minSeconds,
+                              label: "$targetSeconds秒",
+                              onChanged: (value) =>
+                                  onTargetSecondsChanged(value.round()),
+                            ),
+                          ),
+                          Text("$targetSeconds秒"),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("完了時 EXP（見込み）"),
+                            Text(
+                              "+$previewExp",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -123,42 +158,11 @@ class ExercisePanel extends ConsumerWidget {
               ],
             ),
           ),
-          Row(
-            children: [
-              const Text("目標秒数"),
-              Expanded(
-                child: Slider(
-                  value: targetSeconds.toDouble(),
-                  min: _minSeconds.toDouble(),
-                  max: _maxSeconds.toDouble(),
-                  divisions: _maxSeconds - _minSeconds,
-                  label: "$targetSeconds秒",
-                  onChanged: (value) =>
-                      onTargetSecondsChanged(value.round()),
-                ),
-              ),
-              Text("$targetSeconds秒"),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("完了時 EXP（見込み）"),
-                Text(
-                  "+$previewExp",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 8),
+          _CarouselIndicator(
+            count: plankTypes.length,
+            selectedIndex: selectedIndex,
+            onDotTap: onSelectPlank,
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
