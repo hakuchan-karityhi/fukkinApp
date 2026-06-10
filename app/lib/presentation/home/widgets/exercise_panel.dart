@@ -8,22 +8,20 @@ import "../../../domain/models/streak_state.dart";
 class ExercisePanel extends ConsumerWidget {
   const ExercisePanel({
     super.key,
-    required this.plankTypes,
-    required this.selectedIndex,
+    required this.plank,
     required this.targetSeconds,
     required this.streakAsync,
-    required this.onPreviousPanel,
-    required this.onSelectPlank,
+    required this.onPrevious,
+    required this.onNext,
     required this.onTargetSecondsChanged,
     required this.onStart,
   });
 
-  final List<PlankType> plankTypes;
-  final int selectedIndex;
+  final PlankType plank;
   final int targetSeconds;
   final AsyncValue<StreakState> streakAsync;
-  final VoidCallback onPreviousPanel;
-  final ValueChanged<int> onSelectPlank;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
   final ValueChanged<int> onTargetSecondsChanged;
   final VoidCallback onStart;
 
@@ -32,7 +30,6 @@ class ExercisePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final plank = plankTypes[selectedIndex];
     final expCalculator = ref.watch(expCalculatorProvider);
     final streakService = ref.watch(streakServiceProvider);
 
@@ -54,22 +51,12 @@ class ExercisePanel extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "種目を選ぶ",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
-          const SizedBox(height: 8),
           Expanded(
             child: Row(
               children: [
                 _ArrowButton(
                   icon: Icons.chevron_left,
-                  onPressed: selectedIndex > 0
-                      ? () => onSelectPlank(selectedIndex - 1)
-                      : onPreviousPanel,
+                  onPressed: onPrevious,
                 ),
                 Expanded(
                   child: Column(
@@ -103,9 +90,7 @@ class ExercisePanel extends ConsumerWidget {
                 ),
                 _ArrowButton(
                   icon: Icons.chevron_right,
-                  onPressed: selectedIndex < plankTypes.length - 1
-                      ? () => onSelectPlank(selectedIndex + 1)
-                      : null,
+                  onPressed: onNext,
                 ),
               ],
             ),

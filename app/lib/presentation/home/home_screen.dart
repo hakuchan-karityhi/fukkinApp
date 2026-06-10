@@ -17,7 +17,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _pageController = PageController();
-  int _panelIndex = 0;
+  int _currentPage = 0;
 
   @override
   void dispose() {
@@ -25,13 +25,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  void _goToPanel(int index) {
-    setState(() => _panelIndex = index);
+  void _goToPage(int page) {
     _pageController.animateToPage(
-      index,
+      page,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _onPageChanged(int page, List<PlankType> plankTypes) {
+    setState(() => _currentPage = page);
+    if (page > 0) {
+      final plankIndex = page - 1;
+      ref.read(selectedPlankIndexProvider.notifier).state = plankIndex;
+      ref.read(targetSecondsProvider.notifier).state =
+          plankTypes[plankIndex].defaultSeconds;
+    }
   }
 
   Future<void> _startPlank(PlankType plankType, int targetSeconds) async {
@@ -80,44 +89,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   });
                 }
 
-                final selectedPlank = plankTypes[clampedIndex];
                 final targetSeconds = ref.watch(targetSecondsProvider) ??
-                    selectedPlank.defaultSeconds;
+                    plankTypes[clampedIndex].defaultSeconds;
+
+                final isExercisePage = _currentPage > 0;
 
                 return Column(
                   children: [
-                    _PanelIndicator(currentIndex: _panelIndex),
+                    _PanelIndicator(currentPage: _currentPage),
                     const SizedBox(height: 8),
+                    if (isExercisePage)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "種目を選ぶ",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              "$_currentPage / ${plankTypes.length}",
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (isExercisePage) const SizedBox(height: 8),
                     Expanded(
                       child: PageView(
                         controller: _pageController,
-                        onPageChanged: (index) =>
-                            setState(() => _panelIndex = index),
+                        onPageChanged: (page) =>
+                            _onPageChanged(page, plankTypes),
                         children: [
                           CharacterPanel(
                             progressAsync: progressAsync,
-                            onNext: () => _goToPanel(1),
+                            onNext: () => _goToPage(1),
                           ),
-                          ExercisePanel(
-                            plankTypes: plankTypes,
-                            selectedIndex: clampedIndex,
-                            targetSeconds: targetSeconds,
-                            streakAsync: streakAsync,
-                            onPreviousPanel: () => _goToPanel(0),
-                            onSelectPlank: (index) {
-                              ref
-                                  .read(selectedPlankIndexProvider.notifier)
-                                  .state = index;
-                              ref.read(targetSecondsProvider.notifier).state =
-                                  plankTypes[index].defaultSeconds;
-                            },
-                            onTargetSecondsChanged: (seconds) {
-                              ref.read(targetSecondsProvider.notifier).state =
-                                  seconds;
-                            },
-                            onStart: () =>
-                                _startPlank(selectedPlank, targetSeconds),
-                          ),
+                          for (var i = 0; i < plankTypes.length; i++)
+                            ExercisePanel(
+                              plank: plankTypes[i],
+                              targetSeconds: targetSeconds,
+                              streakAsync: streakAsync,
+                              onPrevious: () => _goToPage(i),
+                              onNext: i < plankTypes.length - 1
+                                  ? () => _goToPage(i + 2)
+                                  : null,
+                              onTargetSecondsChanged: (seconds) {
+                                ref.read(targetSecondsProvider.notifier).state =
+                                    seconds;
+                              },
+                              onStart: () => _startPlank(
+                                plankTypes[i],
+                                targetSeconds,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -135,18 +165,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class _PanelIndicator extends StatelessWidget {
-  const _PanelIndicator({required this.currentIndex});
+  const _PanelIndicator({required this.currentPage});
 
-  final int currentIndex;
+  final int currentPage;
 
   static const _labels = ["かんちゃん", "種目"];
 
   @override
   Widget build(BuildContext context) {
+    final panelIndex = currentPage == 0 ? 0 : 1;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_labels.length, (index) {
-        final isActive = index == currentIndex;
+        final isActive = index == panelIndex;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Row(
