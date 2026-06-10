@@ -53,6 +53,7 @@ developBase/
 ## 開発
 
 1, 01-designで企画、設計をする
+2, cursorに開発な必要なブランチを全て切ってと伝える（main,develop,mvp,beta,release）
 
 ## ライセンス
 

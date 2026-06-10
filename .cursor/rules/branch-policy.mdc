@@ -1,0 +1,38 @@
+---
+description: ブランチ作成・切り替え時は devPolicy のブランチ運用規則に従う
+alwaysApply: true
+---
+
+# ブランチ運用ポリシー
+
+ブランチの作成・切り替え・マージに関する作業では、必ず `devPolicy/branch/branchRule.md` に従う。
+
+## 作成時の必須手順
+
+1. `scripts/git/new-branch.sh` を使ってブランチを作成する（直接 `git checkout -b` しない）
+2. 不明点があれば `.cursor/skills/create-branch/SKILL.md` のワークフローに従う
+3. 作成前にユーザーへブランチ名・分岐元を確認する
+
+## 分岐元（要約）
+
+| 種類 | プレフィックス | 分岐元 |
+|------|----------------|--------|
+| 機能開発 | `feature/` | `develop` |
+| バグ修正 | `fix/` | `develop` / `mvp` / `beta` / `release` |
+| 緊急修正 | `hotfix/` | `main` |
+| ドキュメント | `docs/` | `develop` |
+
+## 命名（要約）
+
+- 小文字とハイフンのみ（スネークケース・大文字禁止）
+- `feature/`・`fix/` は issue 番号を含める（例: `feature/001-flutter-setup`）
+- subissue: `feature/<親>-<機能名>-<sub>-<サブタスク>`
+- 単独の `test` / `fix` / `update` など意味のない名前は禁止
+
+## 禁止事項
+
+- `main` への直接 push（PR のみ）
+- ルール外の分岐元からのブランチ作成
+- フェーズブランチで直した修正を `develop` に逆流させないこと
+
+詳細は `devPolicy/branch/branchRule.md` を参照。

@@ -370,7 +370,7 @@
 |------|------|
 | `01-kikaku.md` | 企画書（コンセプト・UX・数値たたき台） |
 | `03-phase.md` | 開発フェーズ計画 |
-| `04-basic-design.md` | 基本設計（今後作成） |
+| `04-basic-design.md` | 基本設計（MVP） |
 | `05-detailed-design.md` | 詳細設計（今後作成） |
 
 ---
