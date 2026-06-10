@@ -128,23 +128,37 @@ class CarouselIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final selected = index == selectedIndex;
-        return GestureDetector(
-          onTap: () => onDotTap(index),
-          child: Container(
-            width: selected ? 10 : 8,
-            height: selected ? 10 : 8,
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey.shade300,
+      children: [
+        Text(
+          "${selectedIndex + 1} / $count",
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(count, (index) {
+                final selected = index == selectedIndex;
+                return GestureDetector(
+                  onTap: () => onDotTap(index),
+                  child: Container(
+                    width: selected ? 10 : 8,
+                    height: selected ? 10 : 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
-        );
-      }),
+        ),
+      ],
     );
   }
 }

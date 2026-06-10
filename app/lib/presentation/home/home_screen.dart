@@ -179,16 +179,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                   ),
-                                  child: OutlinedButton.icon(
-                                    onPressed: () => _startPlank(
-                                      activePlank,
-                                      targetSeconds,
-                                    ),
-                                    icon: const Icon(Icons.play_arrow),
-                                    label: const Text("スタート"),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 52,
+                                    child: FilledButton.icon(
+                                      onPressed: () => _startPlank(
+                                        activePlank,
+                                        targetSeconds,
+                                      ),
+                                      icon: const Icon(Icons.play_arrow, size: 24),
+                                      label: const Text(
+                                        "スタート",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
