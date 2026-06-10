@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "../presentation/shell/shell_screen.dart";
+import "../presentation/main/main_shell.dart";
 import "theme.dart";
 
 class FukkinApp extends StatelessWidget {
@@ -13,7 +13,7 @@ class FukkinApp extends StatelessWidget {
       child: MaterialApp(
         title: "ふっきん",
         theme: fukkinTheme,
-        home: const ShellScreen(),
+        home: const MainShell(),
       ),
     );
   }
