@@ -10,4 +10,8 @@ abstract class MilestoneRepository {
   Future<List<MilestoneAchievement>> getAchieved();
 
   Future<void> addAchievement(MilestoneAchievement achievement);
+
+  Future<void> deleteAllAchievements();
+
+  Future<void> resetTargetsToBuiltin();
 }

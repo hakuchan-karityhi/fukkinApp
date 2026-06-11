@@ -1,58 +1,25 @@
 import "package:flutter/material.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "../../../app/providers.dart";
 import "../../../domain/models/plank_type.dart";
-import "../../../domain/models/streak_state.dart";
 import "../../widgets/plank_pose_view.dart";
 
-class PlankDetailPanel extends ConsumerWidget {
+class PlankDetailPanel extends StatelessWidget {
   const PlankDetailPanel({
     super.key,
     required this.plank,
     required this.targetSeconds,
-    required this.streakAsync,
     required this.onTargetSecondsChanged,
   });
 
   final PlankType plank;
   final int targetSeconds;
-  final AsyncValue<StreakState> streakAsync;
   final ValueChanged<int> onTargetSecondsChanged;
 
   static const _minSeconds = 10;
   static const _maxSeconds = 120;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final expCalculator = ref.watch(expCalculatorProvider);
-    final streakService = ref.watch(streakServiceProvider);
-    final todayWorkoutAsync = ref.watch(todayWorkoutSummaryProvider);
-
-    final previewExp = streakAsync.maybeWhen(
-      data: (streak) {
-        if (expCalculator == null || streakService == null) return 0;
-        final todayWorkout = todayWorkoutAsync.valueOrNull;
-        final nextSessionIndex = (todayWorkout?.sessionCount ?? 0) + 1;
-        final todayEarnedExp = todayWorkout?.earnedExpToday ?? 0;
-        return expCalculator.calculate(
-          baseExp: targetSeconds,
-          difficultyMultiplier: plank.expMultiplier,
-          streakMultiplier: streakService.getMultiplier(streak.currentStreak),
-          sessionIndexOfDay: nextSessionIndex,
-          todayEarnedExp: todayEarnedExp,
-        );
-      },
-      orElse: () => 0,
-    );
-
-    final nextSessionIndex =
-        (todayWorkoutAsync.valueOrNull?.sessionCount ?? 0) + 1;
-    final repeatBonusPercent = expCalculator?.repeatSessionBonusPercent(
-          nextSessionIndex,
-        ) ??
-        0;
-
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 108),
       child: Column(
@@ -119,40 +86,6 @@ class PlankDetailPanel extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("完了時 EXP（見込み）"),
-                    Text(
-                      "+$previewExp",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                if (repeatBonusPercent > 0) ...[
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "再実施（$nextSessionIndex回目 +$repeatBonusPercent%）",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ],
-            ),
           ),
         ],
       ),

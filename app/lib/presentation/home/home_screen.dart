@@ -133,7 +133,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   PlankDetailPanel(
                                     plank: plankTypes[i],
                                     targetSeconds: targetSeconds,
-                                    streakAsync: streakAsync,
                                     onTargetSecondsChanged: (seconds) {
                                       ref
                                           .read(targetSecondsProvider.notifier)

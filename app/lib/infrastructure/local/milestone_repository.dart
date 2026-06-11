@@ -79,4 +79,17 @@ class DriftMilestoneRepository implements MilestoneRepository {
           ),
         );
   }
+
+  @override
+  Future<void> deleteAllAchievements() async {
+    await _db.delete(_db.milestoneAchievementEntries).go();
+  }
+
+  @override
+  Future<void> resetTargetsToBuiltin() async {
+    await _db.delete(_db.milestoneTargetEntries).go();
+    for (final target in MilestoneDefaults.builtinTargets) {
+      await addTarget(target);
+    }
+  }
 }

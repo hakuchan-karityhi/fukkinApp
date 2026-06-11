@@ -21,6 +21,7 @@ import "../domain/services/level_service.dart";
 import "../domain/services/penalty_service.dart";
 import "../domain/services/streak_service.dart";
 import "../application/complete_plank_usecase.dart";
+import "../application/reset_progress_usecase.dart";
 import "../infrastructure/local/app_database.dart";
 import "../infrastructure/local/streak_repository.dart";
 import "../infrastructure/local/user_progress_repository.dart";
@@ -170,6 +171,15 @@ final completePlankUseCaseProvider = Provider<CompletePlankUseCase?>((ref) {
     streakService: streakService,
     levelService: levelService,
     milestoneService: ref.watch(milestoneServiceProvider),
+  );
+});
+
+final resetProgressUseCaseProvider = Provider<ResetProgressUseCase>((ref) {
+  return ResetProgressUseCase(
+    userProgressRepository: ref.watch(userProgressRepositoryProvider),
+    streakRepository: ref.watch(streakRepositoryProvider),
+    workoutRepository: ref.watch(workoutRepositoryProvider),
+    milestoneRepository: ref.watch(milestoneRepositoryProvider),
   );
 });
 
