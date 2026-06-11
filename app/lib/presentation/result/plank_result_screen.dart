@@ -48,6 +48,16 @@ class PlankResultScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text("基本EXP: ${result.baseExp}"),
+            if (result.repeatSessionBonusPercent > 0)
+              Text(
+                "再実施（${result.sessionIndexOfDay}回目 "
+                "+${result.repeatSessionBonusPercent}%）",
+              ),
+            if (result.dailyCapReached)
+              Text(
+                "本日の獲得上限に達したため EXP が調整されました",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             Text("ストリーク: ${result.streakAfter}日"),
             if (result.levelUp)
               Text("レベルアップ！ Lv ${result.levelAfter}"),

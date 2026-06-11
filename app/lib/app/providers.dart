@@ -31,6 +31,28 @@ import "../infrastructure/remote_config/remote_config_game_constants_repository.
 
 const betaMode = true;
 
+class TodayWorkoutSummary {
+  const TodayWorkoutSummary({
+    required this.sessionCount,
+    required this.earnedExpToday,
+  });
+
+  final int sessionCount;
+  final int earnedExpToday;
+}
+
+final todayWorkoutSummaryProvider =
+    FutureProvider<TodayWorkoutSummary>((ref) async {
+  final repo = ref.watch(workoutRepositoryProvider);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final records = await repo.getByDate(today);
+  return TodayWorkoutSummary(
+    sessionCount: records.length,
+    earnedExpToday: records.fold(0, (sum, record) => sum + record.earnedExp),
+  );
+});
+
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
   ref.onDispose(db.close);

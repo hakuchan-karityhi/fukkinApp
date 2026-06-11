@@ -105,6 +105,49 @@ void main() {
     expect(records.first.targetSeconds, 25);
   });
 
+  test("同日2回目は+5%ボーナスでストリークは増えない", () async {
+    await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 10),
+    );
+
+    final result = await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 18),
+    );
+
+    expect(result.earnedExp, 32);
+    expect(result.sessionIndexOfDay, 2);
+    expect(result.repeatSessionBonusPercent, 5);
+    expect(result.streakIncreased, isFalse);
+    expect(result.streakAfter, 1);
+  });
+
+  test("同日3回目は+10%ボーナス", () async {
+    await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 10),
+    );
+    await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 14),
+    );
+
+    final result = await useCase.execute(
+      plankTypeId: "PK-01",
+      targetSeconds: 30,
+      now: DateTime(2026, 6, 11, 18),
+    );
+
+    expect(result.earnedExp, 33);
+    expect(result.sessionIndexOfDay, 3);
+    expect(result.repeatSessionBonusPercent, 10);
+  });
+
   test("3日目ストリークでマイルストーン達成が返る", () async {
     await useCase.execute(
       plankTypeId: "PK-01",

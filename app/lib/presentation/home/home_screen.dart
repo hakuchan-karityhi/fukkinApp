@@ -69,6 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.invalidate(userProgressProvider);
       ref.invalidate(streakStateProvider);
       ref.invalidate(milestoneAchievementsProvider);
+      ref.invalidate(todayWorkoutSummaryProvider);
     }
   }
 

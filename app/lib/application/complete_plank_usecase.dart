@@ -64,16 +64,28 @@ class CompletePlankUseCase {
     streak = _normalizeStreakForToday(streak, today);
 
     final todayRecords = await _workoutRepository.getByDate(today);
-    final isSecondSessionToday = todayRecords.isNotEmpty;
+    final sessionIndexOfDay = todayRecords.length + 1;
+    final todayEarnedExp =
+        todayRecords.fold<int>(0, (sum, record) => sum + record.earnedExp);
 
     final streakMultiplier = _streakService.getMultiplier(streak.currentStreak);
     final baseExp = targetSeconds;
+    final repeatSessionBonusPercent =
+        _expCalculator.repeatSessionBonusPercent(sessionIndexOfDay);
+    final rawExp = _expCalculator.calculateRaw(
+      baseExp: baseExp,
+      difficultyMultiplier: plankType.expMultiplier,
+      streakMultiplier: streakMultiplier,
+      sessionIndexOfDay: sessionIndexOfDay,
+    );
     final earnedExp = _expCalculator.calculate(
       baseExp: baseExp,
       difficultyMultiplier: plankType.expMultiplier,
       streakMultiplier: streakMultiplier,
-      isSecondSessionToday: isSecondSessionToday,
+      sessionIndexOfDay: sessionIndexOfDay,
+      todayEarnedExp: todayEarnedExp,
     );
+    final dailyCapReached = earnedExp < rawExp;
 
     final previousLevel = progress.level;
     final newTotalExp = progress.totalExp + earnedExp;
@@ -103,7 +115,7 @@ class CompletePlankUseCase {
       targetSeconds: targetSeconds,
       earnedExp: earnedExp,
       completedAt: completedAt,
-      sessionIndexOfDay: todayRecords.length + 1,
+      sessionIndexOfDay: sessionIndexOfDay,
     );
 
     await _workoutRepository.add(record);
@@ -141,6 +153,9 @@ class CompletePlankUseCase {
       levelAfter: newLevel,
       levelUp: newLevel > previousLevel,
       absStageAfter: newAbsStage,
+      sessionIndexOfDay: sessionIndexOfDay,
+      repeatSessionBonusPercent: repeatSessionBonusPercent,
+      dailyCapReached: dailyCapReached,
       milestoneReached: milestoneReached,
     );
   }
