@@ -133,7 +133,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   PlankDetailPanel(
                                     plank: plankTypes[i],
                                     targetSeconds: targetSeconds,
-                                    streakAsync: streakAsync,
                                     onTargetSecondsChanged: (seconds) {
                                       ref
                                           .read(targetSecondsProvider.notifier)
@@ -151,15 +150,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       if (isExercisePage) ...[
                         Positioned(
-                          top: 0,
-                          left: 64,
-                          right: 64,
-                          child: Text(
-                            "種目を選ぶ",
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w600),
+                          top: 4,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Text(
+                              "種目を選ぶ",
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         Positioned(

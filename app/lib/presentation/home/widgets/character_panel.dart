@@ -4,8 +4,6 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../../app/providers.dart";
 import "../../../domain/models/streak_state.dart";
 import "../../../domain/models/user_progress.dart";
-import "../../widgets/character_expression_view.dart";
-import "../../widgets/dialogue_bubble.dart";
 
 class CharacterPanel extends ConsumerWidget {
   const CharacterPanel({
@@ -16,6 +14,8 @@ class CharacterPanel extends ConsumerWidget {
 
   final AsyncValue<UserProgress> progressAsync;
   final AsyncValue<StreakState> streakAsync;
+
+  static const _characterImageAsset = "assets/character/kangaru1.png";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,30 +29,18 @@ class CharacterPanel extends ConsumerWidget {
         data: (progress) => streakAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, __) => const Center(child: Icon(Icons.error_outline)),
-          data: (streak) => dialoguesAsync.when(
+          data: (_) => dialoguesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Center(child: Icon(Icons.error_outline)),
             data: (master) {
-              final selector = ref.watch(characterDialogueSelectorProvider);
-              final dialogue = selector.homeDialogue(
-                master: master,
-                streak: streak,
-                now: DateTime.now(),
-              );
-              final expressionKey =
-                  selector.expressionKey(progress.absStage);
-              final expression = master.expressions[expressionKey] ??
-                  master.expressions["0"]!;
-
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    DialogueBubble(text: dialogue),
-                    const SizedBox(height: 16),
-                    CharacterExpressionView(
-                      absStage: progress.absStage,
-                      expression: expression,
+                    Image.asset(
+                      _characterImageAsset,
+                      height: 380,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 16),
                     Text(

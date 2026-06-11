@@ -18,7 +18,6 @@ class HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final levelService = ref.watch(levelServiceProvider);
-    final streakService = ref.watch(streakServiceProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -71,15 +70,7 @@ class HomeHeader extends ConsumerWidget {
           const SizedBox(height: 8),
           streakAsync.when(
             data: (streak) {
-              final multiplier = streakService?.getMultiplier(streak.currentStreak) ??
-                  1.0;
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("ストリーク${streak.currentStreak}日"),
-                  Text("倍率${multiplier.toStringAsFixed(1)}"),
-                ],
-              );
+              return Text("ストリーク${streak.currentStreak}日");
             },
             loading: () => const SizedBox(height: 20),
             error: (_, __) => const SizedBox.shrink(),

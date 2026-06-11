@@ -1,79 +1,41 @@
 import "package:flutter/material.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "../../../app/providers.dart";
 import "../../../domain/models/plank_type.dart";
-import "../../../domain/models/streak_state.dart";
 import "../../widgets/plank_pose_view.dart";
 
-class PlankDetailPanel extends ConsumerWidget {
+class PlankDetailPanel extends StatelessWidget {
   const PlankDetailPanel({
     super.key,
     required this.plank,
     required this.targetSeconds,
-    required this.streakAsync,
     required this.onTargetSecondsChanged,
   });
 
   final PlankType plank;
   final int targetSeconds;
-  final AsyncValue<StreakState> streakAsync;
   final ValueChanged<int> onTargetSecondsChanged;
 
   static const _minSeconds = 10;
   static const _maxSeconds = 120;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final expCalculator = ref.watch(expCalculatorProvider);
-    final streakService = ref.watch(streakServiceProvider);
-    final todayWorkoutAsync = ref.watch(todayWorkoutSummaryProvider);
-
-    final previewExp = streakAsync.maybeWhen(
-      data: (streak) {
-        if (expCalculator == null || streakService == null) return 0;
-        final todayWorkout = todayWorkoutAsync.valueOrNull;
-        final nextSessionIndex = (todayWorkout?.sessionCount ?? 0) + 1;
-        final todayEarnedExp = todayWorkout?.earnedExpToday ?? 0;
-        return expCalculator.calculate(
-          baseExp: targetSeconds,
-          difficultyMultiplier: plank.expMultiplier,
-          streakMultiplier: streakService.getMultiplier(streak.currentStreak),
-          sessionIndexOfDay: nextSessionIndex,
-          todayEarnedExp: todayEarnedExp,
-        );
-      },
-      orElse: () => 0,
-    );
-
-    final nextSessionIndex =
-        (todayWorkoutAsync.valueOrNull?.sessionCount ?? 0) + 1;
-    final repeatBonusPercent = expCalculator?.repeatSessionBonusPercent(
-          nextSessionIndex,
-        ) ??
-        0;
-
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 28, 16, 108),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 108),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          PlankPoseView(plankType: plank, size: 72),
-          const SizedBox(height: 12),
+          PlankPoseView(plankType: plank, size: 180, showLabel: false),
+          const SizedBox(height: 4),
           Text(
             plank.name,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _DifficultyStars(difficulty: plank.difficulty),
-              const SizedBox(width: 8),
-              _MultiplierBadge(multiplier: plank.expMultiplier),
-            ],
-          ),
+          Center(child: _DifficultyStars(difficulty: plank.difficulty)),
           if (plank.isPerSide) ...[
             const SizedBox(height: 4),
             Text(
@@ -81,11 +43,38 @@ class PlankDetailPanel extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
-          const SizedBox(height: 16),
-          Row(
+          const SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text("目標秒数"),
-              Expanded(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "目標秒数",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    "$targetSeconds秒",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ],
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 10,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 16,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 24,
+                  ),
+                ),
                 child: Slider(
                   value: targetSeconds.toDouble(),
                   min: _minSeconds.toDouble(),
@@ -96,42 +85,7 @@ class PlankDetailPanel extends ConsumerWidget {
                       onTargetSecondsChanged(value.round()),
                 ),
               ),
-              Text("$targetSeconds秒"),
             ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("完了時 EXP（見込み）"),
-                    Text(
-                      "+$previewExp",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                if (repeatBonusPercent > 0) ...[
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "再実施（$nextSessionIndex回目 +$repeatBonusPercent%）",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ],
-            ),
           ),
         ],
       ),
@@ -227,32 +181,6 @@ class _DifficultyStars extends StatelessWidget {
           color: filled ? Colors.orange : Colors.grey,
         );
       }),
-    );
-  }
-}
-
-class _MultiplierBadge extends StatelessWidget {
-  const _MultiplierBadge({required this.multiplier});
-
-  final double multiplier;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.shade200),
-      ),
-      child: Text(
-        "×${multiplier.toStringAsFixed(1)}",
-        style: TextStyle(
-          color: Colors.green.shade800,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

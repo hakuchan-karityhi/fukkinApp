@@ -64,6 +64,11 @@ class DriftWorkoutRepository implements WorkoutRepository {
         .toSet();
   }
 
+  @override
+  Future<void> deleteAll() async {
+    await _db.delete(_db.workoutRecordEntries).go();
+  }
+
   String _dateKey(DateTime date) =>
       DateTime(date.year, date.month, date.day).toIso8601String();
 }
