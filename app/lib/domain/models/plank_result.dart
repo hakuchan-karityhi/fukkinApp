@@ -13,6 +13,9 @@ class PlankResult {
     required this.levelAfter,
     required this.levelUp,
     required this.absStageAfter,
+    required this.sessionIndexOfDay,
+    required this.repeatSessionBonusPercent,
+    required this.dailyCapReached,
     this.milestoneReached,
   });
 
@@ -27,5 +30,8 @@ class PlankResult {
   final int levelAfter;
   final bool levelUp;
   final int absStageAfter;
+  final int sessionIndexOfDay;
+  final int repeatSessionBonusPercent;
+  final bool dailyCapReached;
   final MilestoneAchievement? milestoneReached;
 }

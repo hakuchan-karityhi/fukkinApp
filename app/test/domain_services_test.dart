@@ -30,9 +30,52 @@ void main() {
         baseExp: 30,
         difficultyMultiplier: 1.0,
         streakMultiplier: 1.2,
-        isSecondSessionToday: false,
+        sessionIndexOfDay: 1,
       ),
       36,
+    );
+  });
+
+  test("再実施ボーナス倍率: 2回目+5%, 3回目+10%, 4回目以降+15%", () {
+    expect(expCalculator.repeatSessionMultiplier(1), 1.0);
+    expect(expCalculator.repeatSessionMultiplier(2), 1.05);
+    expect(expCalculator.repeatSessionMultiplier(3), 1.10);
+    expect(expCalculator.repeatSessionMultiplier(4), 1.15);
+    expect(expCalculator.repeatSessionMultiplier(5), 1.15);
+  });
+
+  test("同日2回目: 30秒 x1.5 x1.2 x1.05 = 57", () {
+    expect(
+      expCalculator.calculate(
+        baseExp: 30,
+        difficultyMultiplier: 1.5,
+        streakMultiplier: 1.2,
+        sessionIndexOfDay: 2,
+      ),
+      57,
+    );
+  });
+
+  test("日次上限150で超過分を切り捨て", () {
+    expect(
+      expCalculator.calculate(
+        baseExp: 120,
+        difficultyMultiplier: 1.5,
+        streakMultiplier: 1.5,
+        sessionIndexOfDay: 1,
+        todayEarnedExp: 140,
+      ),
+      10,
+    );
+    expect(
+      expCalculator.calculate(
+        baseExp: 30,
+        difficultyMultiplier: 1.0,
+        streakMultiplier: 1.0,
+        sessionIndexOfDay: 1,
+        todayEarnedExp: 150,
+      ),
+      0,
     );
   });
 
@@ -49,7 +92,19 @@ void main() {
     );
     final loaded = await repo.load();
     expect(loaded.dailyExpCap, 150);
+    expect(loaded.repeatSessionBonusStep, 0.05);
+    expect(loaded.repeatSessionBonusCap, 1.15);
     expect(loaded.levelThresholds, [150, 400, 800, 1400]);
+  });
+
+  test("Remote Config で repeat_session_bonus_cap を上書き", () async {
+    final repo = RemoteConfigGameConstantsRepository(
+      fetchOverrides: () async => {
+        "repeat_session_bonus_cap": 1.2,
+      },
+    );
+    final loaded = await repo.load();
+    expect(loaded.repeatSessionBonusCap, 1.2);
   });
 
   test("Remote Config で level_thresholds を上書き", () async {

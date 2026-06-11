@@ -34,11 +34,16 @@ class RemoteConfigGameConstantsRepository implements GameConstantsRepository {
             base.levelThresholds,
           ) ??
           base.levelThresholds,
-      secondSessionExpRate: _parseDouble(
-            overrides[RemoteConfigKeys.secondSessionExpRate],
-            base.secondSessionExpRate,
+      repeatSessionBonusStep: _parseDouble(
+            overrides[RemoteConfigKeys.repeatSessionBonusStep],
+            base.repeatSessionBonusStep,
           ) ??
-          base.secondSessionExpRate,
+          base.repeatSessionBonusStep,
+      repeatSessionBonusCap: _parseDouble(
+            overrides[RemoteConfigKeys.repeatSessionBonusCap],
+            base.repeatSessionBonusCap,
+          ) ??
+          base.repeatSessionBonusCap,
       dailyExpCap: _parseInt(
             overrides[RemoteConfigKeys.dailyExpCap],
             base.dailyExpCap,

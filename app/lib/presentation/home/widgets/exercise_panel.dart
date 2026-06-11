@@ -27,19 +27,31 @@ class PlankDetailPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final expCalculator = ref.watch(expCalculatorProvider);
     final streakService = ref.watch(streakServiceProvider);
+    final todayWorkoutAsync = ref.watch(todayWorkoutSummaryProvider);
 
     final previewExp = streakAsync.maybeWhen(
       data: (streak) {
         if (expCalculator == null || streakService == null) return 0;
+        final todayWorkout = todayWorkoutAsync.valueOrNull;
+        final nextSessionIndex = (todayWorkout?.sessionCount ?? 0) + 1;
+        final todayEarnedExp = todayWorkout?.earnedExpToday ?? 0;
         return expCalculator.calculate(
           baseExp: targetSeconds,
           difficultyMultiplier: plank.expMultiplier,
           streakMultiplier: streakService.getMultiplier(streak.currentStreak),
-          isSecondSessionToday: streak.todayCompleted,
+          sessionIndexOfDay: nextSessionIndex,
+          todayEarnedExp: todayEarnedExp,
         );
       },
       orElse: () => 0,
     );
+
+    final nextSessionIndex =
+        (todayWorkoutAsync.valueOrNull?.sessionCount ?? 0) + 1;
+    final repeatBonusPercent = expCalculator?.repeatSessionBonusPercent(
+          nextSessionIndex,
+        ) ??
+        0;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 28, 16, 108),
@@ -93,17 +105,31 @@ class PlankDetailPanel extends ConsumerWidget {
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                const Text("完了時 EXP（見込み）"),
-                Text(
-                  "+$previewExp",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("完了時 EXP（見込み）"),
+                    Text(
+                      "+$previewExp",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
+                if (repeatBonusPercent > 0) ...[
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "再実施（$nextSessionIndex回目 +$repeatBonusPercent%）",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

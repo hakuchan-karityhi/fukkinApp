@@ -2,7 +2,8 @@ class GameConstants {
   const GameConstants({
     required this.streakMultipliers,
     required this.levelThresholds,
-    required this.secondSessionExpRate,
+    required this.repeatSessionBonusStep,
+    required this.repeatSessionBonusCap,
     required this.dailyExpCap,
     required this.penaltyMinExp,
     required this.penaltySecondDayRate,
@@ -10,7 +11,8 @@ class GameConstants {
 
   final List<StreakMultiplierTier> streakMultipliers;
   final List<int> levelThresholds;
-  final double secondSessionExpRate;
+  final double repeatSessionBonusStep;
+  final double repeatSessionBonusCap;
   final int dailyExpCap;
   final int penaltyMinExp;
   final double penaltySecondDayRate;
@@ -24,7 +26,8 @@ class GameConstants {
           StreakMultiplierTier(minDays: 30, maxDays: 9999, multiplier: 1.5),
         ],
         levelThresholds: [150, 400, 800, 1400],
-        secondSessionExpRate: 0.5,
+        repeatSessionBonusStep: 0.05,
+        repeatSessionBonusCap: 1.15,
         dailyExpCap: 150,
         penaltyMinExp: 10,
         penaltySecondDayRate: 0.5,
