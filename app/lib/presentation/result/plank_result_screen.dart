@@ -9,6 +9,8 @@ import "../widgets/milestone_celebration.dart";
 class PlankResultScreen extends ConsumerWidget {
   const PlankResultScreen({super.key, required this.result});
 
+  static const _characterImageAsset = "assets/character/kangaru1.png";
+
   final PlankResult result;
 
   @override
@@ -19,8 +21,7 @@ class PlankResultScreen extends ConsumerWidget {
             const [150, 400, 800, 1400];
     final totalExpBefore = result.totalExpAfter - result.earnedExp;
     final animationDelay = Duration(
-      milliseconds: (result.streakIncreased ? 400 : 0) +
-          (milestone != null ? 600 : 0),
+      milliseconds: milestone != null ? 600 : 0,
     );
 
     return Scaffold(
@@ -30,22 +31,24 @@ class PlankResultScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (result.streakIncreased) ...[
-              const Icon(Icons.local_fire_department, size: 64),
-              Text(
-                "ストリーク ${result.streakAfter}日！",
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-            ],
             if (milestone != null) ...[
               MilestoneCelebration(milestone: milestone),
               const SizedBox(height: 16),
             ],
             Text(
               result.plankTypeName,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "完了！",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -80,7 +83,16 @@ class PlankResultScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-            const Spacer(),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Center(
+                child: Image.asset(
+                  _characterImageAsset,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: () {
                 Navigator.of(context).popUntil((route) => route.isFirst);
