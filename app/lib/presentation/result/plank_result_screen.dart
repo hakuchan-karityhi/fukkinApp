@@ -1,16 +1,27 @@
 import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "../../app/providers.dart";
 import "../../domain/models/plank_result.dart";
+import "../widgets/exp_gain_progress_bar.dart";
 import "../widgets/milestone_celebration.dart";
 
-class PlankResultScreen extends StatelessWidget {
+class PlankResultScreen extends ConsumerWidget {
   const PlankResultScreen({super.key, required this.result});
 
   final PlankResult result;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final milestone = result.milestoneReached;
+    final thresholds =
+        ref.watch(gameConstantsProvider).valueOrNull?.levelThresholds ??
+            const [150, 400, 800, 1400];
+    final totalExpBefore = result.totalExpAfter - result.earnedExp;
+    final animationDelay = Duration(
+      milliseconds: (result.streakIncreased ? 400 : 0) +
+          (milestone != null ? 600 : 0),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text("結果")),
@@ -37,14 +48,13 @@ class PlankResultScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            Text(
-              "+${result.earnedExp} EXP",
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
+            const SizedBox(height: 16),
+            ExpGainProgressBar(
+              totalExpBefore: totalExpBefore,
+              totalExpAfter: result.totalExpAfter,
+              earnedExp: result.earnedExp,
+              levelThresholds: thresholds,
+              startDelay: animationDelay,
             ),
             const SizedBox(height: 16),
             Text("基本EXP: ${result.baseExp}"),
@@ -58,9 +68,18 @@ class PlankResultScreen extends StatelessWidget {
                 "本日の獲得上限に達したため EXP が調整されました",
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-            Text("ストリーク: ${result.streakAfter}日"),
             if (result.levelUp)
-              Text("レベルアップ！ Lv ${result.levelAfter}"),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  "レベルアップ！ Lv ${result.levelAfter}",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             const Spacer(),
             FilledButton(
               onPressed: () {
