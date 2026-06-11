@@ -8,6 +8,7 @@ void main() {
 
     expect(find.text("home"), findsOneWidget);
     expect(find.text("記録"), findsOneWidget);
+    expect(find.text("アルバム"), findsOneWidget);
     expect(find.text("設定"), findsOneWidget);
   });
 }
