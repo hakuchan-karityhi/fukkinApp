@@ -117,7 +117,15 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
     final cheerText = _buildCheerText();
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.plankType.name)),
+      appBar: AppBar(
+        title: Text(
+          widget.plankType.name,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -125,7 +133,7 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
           children: [
             PlankPoseView(
               plankType: widget.plankType,
-              size: 80,
+              size: 200,
               showLabel: false,
             ),
             if (cheerText != null) ...[

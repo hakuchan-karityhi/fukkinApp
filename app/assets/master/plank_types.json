@@ -9,7 +9,7 @@
       "enabledInMvp": true,
       "enabledInBeta": true,
       "poseAssetId": "basic_plank",
-      "formImageAsset": "assets/character/pk01_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 30,
       "recommendedSecondsMax": 60
     },
@@ -22,7 +22,7 @@
       "enabledInMvp": true,
       "enabledInBeta": true,
       "poseAssetId": "knee_plank",
-      "formImageAsset": "assets/character/pk02_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 30,
       "recommendedSecondsMax": 60
     },
@@ -35,7 +35,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "high_plank",
-      "formImageAsset": "assets/character/pk03_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 45
     },
@@ -48,7 +48,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "reverse_plank",
-      "formImageAsset": "assets/character/pk04_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
     },
@@ -61,7 +61,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "side_plank",
-      "formImageAsset": "assets/character/pk05_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 15,
       "recommendedSecondsMax": 30,
       "isPerSide": true
@@ -75,7 +75,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "plank_jack",
-      "formImageAsset": "assets/character/pk06_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
     },
@@ -88,7 +88,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "spider_plank",
-      "formImageAsset": "assets/character/pk07_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
     },
@@ -101,7 +101,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "leg_lift_plank",
-      "formImageAsset": "assets/character/pk08_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
     },
@@ -114,7 +114,7 @@
       "enabledInMvp": false,
       "enabledInBeta": true,
       "poseAssetId": "shoulder_tap_plank",
-      "formImageAsset": "assets/character/pk09_form.png",
+      "formImageAsset": "assets/character/kangaru2.png",
       "recommendedSecondsMin": 20,
       "recommendedSecondsMax": 40
     }

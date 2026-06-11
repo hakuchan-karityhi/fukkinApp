@@ -4,7 +4,7 @@ import "package:fukkin/domain/models/plank_type.dart";
 import "package:fukkin/presentation/widgets/plank_pose_view.dart";
 
 void main() {
-  testWidgets("種目ごとに異なるポーズアイコンを表示", (tester) async {
+  testWidgets("種目にプランクフォーム画像を表示", (tester) async {
     const basic = PlankType(
       id: "PK-01",
       name: "ベーシック",
@@ -14,7 +14,7 @@ void main() {
       enabledInMvp: true,
       enabledInBeta: true,
       poseAssetId: "basic_plank",
-      formImageAsset: "",
+      formImageAsset: "assets/character/kangaru2.png",
       recommendedSecondsMin: 30,
       recommendedSecondsMax: 60,
     );
@@ -27,7 +27,7 @@ void main() {
       enabledInMvp: false,
       enabledInBeta: true,
       poseAssetId: "spider_plank",
-      formImageAsset: "",
+      formImageAsset: "assets/character/kangaru2.png",
       recommendedSecondsMin: 20,
       recommendedSecondsMax: 40,
     );
@@ -45,7 +45,16 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.self_improvement), findsOneWidget);
-    expect(find.byIcon(Icons.bug_report), findsOneWidget);
+    expect(find.byType(Image), findsNWidgets(2));
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Image &&
+            widget.image is AssetImage &&
+            (widget.image as AssetImage).assetName ==
+                "assets/character/kangaru2.png",
+      ),
+      findsNWidgets(2),
+    );
   });
 }
