@@ -3,8 +3,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/milestone.dart";
 import "../../domain/models/streak_state.dart";
+import "widgets/milestone_debug_panel.dart";
 import "widgets/milestone_target_editor.dart";
 import "widgets/month_calendar.dart";
+import "widgets/streak_debug_panel.dart";
 
 final _recordsMonthProvider = StateProvider<DateTime>((ref) {
   final now = DateTime.now();
@@ -102,6 +104,14 @@ class RecordsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             achievementsAsync.when(
               data: (achievements) => _AchievementList(achievements: achievements),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
+            const StreakDebugPanel(),
+            const SizedBox(height: 16),
+            targetsAsync.when(
+              data: (targets) => MilestoneDebugPanel(targets: targets),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),

@@ -5,7 +5,7 @@ Firebase Remote Config に設定するキーとデフォルト値。未取得時
 | キー | 型 | デフォルト | 説明 |
 |------|-----|-----------|------|
 | `level_thresholds` | JSON 配列 | `[150,400,800,1400]` | 腹筋ステージ閾値（累計 EXP） |
-| `second_session_exp_rate` | number | `0.5` | 同日2回目基本 EXP 率 |
+| `second_session_exp_bonus_rate` | number | `1.15` | 同日2回目再実施ボーナス倍率（+15%）。2回目のみ適用 |
 | `daily_exp_cap` | number | `150` | 1日 EXP 上限 |
 | `penalty_min_exp` | number | `10` | ペナルティ最小減少量 |
 | `penalty_second_day_rate` | number | `0.5` | 2日目ペナルティ率 |
