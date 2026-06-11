@@ -1,3 +1,5 @@
+import "milestone.dart";
+
 class PlankResult {
   const PlankResult({
     required this.earnedExp,
@@ -11,6 +13,7 @@ class PlankResult {
     required this.levelAfter,
     required this.levelUp,
     required this.absStageAfter,
+    this.milestoneReached,
   });
 
   final int earnedExp;
@@ -24,4 +27,5 @@ class PlankResult {
   final int levelAfter;
   final bool levelUp;
   final int absStageAfter;
+  final MilestoneAchievement? milestoneReached;
 }

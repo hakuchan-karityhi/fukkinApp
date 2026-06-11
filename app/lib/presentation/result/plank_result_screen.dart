@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "../../domain/models/plank_result.dart";
+import "../widgets/milestone_celebration.dart";
 
 class PlankResultScreen extends StatelessWidget {
   const PlankResultScreen({super.key, required this.result});
@@ -9,6 +10,8 @@ class PlankResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final milestone = result.milestoneReached;
+
     return Scaffold(
       appBar: AppBar(title: const Text("結果")),
       body: Padding(
@@ -16,8 +19,19 @@ class PlankResultScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.celebration, size: 64),
-            const SizedBox(height: 16),
+            if (result.streakIncreased) ...[
+              const Icon(Icons.local_fire_department, size: 64),
+              Text(
+                "ストリーク ${result.streakAfter}日！",
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (milestone != null) ...[
+              MilestoneCelebration(milestone: milestone),
+              const SizedBox(height: 16),
+            ],
             Text(
               result.plankTypeName,
               style: Theme.of(context).textTheme.titleLarge,
@@ -35,8 +49,6 @@ class PlankResultScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text("基本EXP: ${result.baseExp}"),
             Text("ストリーク: ${result.streakAfter}日"),
-            if (result.streakIncreased)
-              const Text("ストリーク +1！"),
             if (result.levelUp)
               Text("レベルアップ！ Lv ${result.levelAfter}"),
             const Spacer(),

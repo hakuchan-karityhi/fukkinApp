@@ -1221,6 +1221,521 @@ class WorkoutRecordEntriesCompanion
   }
 }
 
+class $MilestoneTargetEntriesTable extends MilestoneTargetEntries
+    with TableInfo<$MilestoneTargetEntriesTable, MilestoneTargetEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MilestoneTargetEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _daysMeta = const VerificationMeta('days');
+  @override
+  late final GeneratedColumn<int> days = GeneratedColumn<int>(
+    'days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isBuiltinMeta = const VerificationMeta(
+    'isBuiltin',
+  );
+  @override
+  late final GeneratedColumn<bool> isBuiltin = GeneratedColumn<bool>(
+    'is_builtin',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_builtin" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [days, title, isBuiltin];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'milestone_target_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MilestoneTargetEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('days')) {
+      context.handle(
+        _daysMeta,
+        days.isAcceptableOrUnknown(data['days']!, _daysMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('is_builtin')) {
+      context.handle(
+        _isBuiltinMeta,
+        isBuiltin.isAcceptableOrUnknown(data['is_builtin']!, _isBuiltinMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {days};
+  @override
+  MilestoneTargetEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MilestoneTargetEntry(
+      days: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}days'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      isBuiltin: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_builtin'],
+      )!,
+    );
+  }
+
+  @override
+  $MilestoneTargetEntriesTable createAlias(String alias) {
+    return $MilestoneTargetEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class MilestoneTargetEntry extends DataClass
+    implements Insertable<MilestoneTargetEntry> {
+  final int days;
+  final String title;
+  final bool isBuiltin;
+  const MilestoneTargetEntry({
+    required this.days,
+    required this.title,
+    required this.isBuiltin,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['days'] = Variable<int>(days);
+    map['title'] = Variable<String>(title);
+    map['is_builtin'] = Variable<bool>(isBuiltin);
+    return map;
+  }
+
+  MilestoneTargetEntriesCompanion toCompanion(bool nullToAbsent) {
+    return MilestoneTargetEntriesCompanion(
+      days: Value(days),
+      title: Value(title),
+      isBuiltin: Value(isBuiltin),
+    );
+  }
+
+  factory MilestoneTargetEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MilestoneTargetEntry(
+      days: serializer.fromJson<int>(json['days']),
+      title: serializer.fromJson<String>(json['title']),
+      isBuiltin: serializer.fromJson<bool>(json['isBuiltin']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'days': serializer.toJson<int>(days),
+      'title': serializer.toJson<String>(title),
+      'isBuiltin': serializer.toJson<bool>(isBuiltin),
+    };
+  }
+
+  MilestoneTargetEntry copyWith({int? days, String? title, bool? isBuiltin}) =>
+      MilestoneTargetEntry(
+        days: days ?? this.days,
+        title: title ?? this.title,
+        isBuiltin: isBuiltin ?? this.isBuiltin,
+      );
+  MilestoneTargetEntry copyWithCompanion(MilestoneTargetEntriesCompanion data) {
+    return MilestoneTargetEntry(
+      days: data.days.present ? data.days.value : this.days,
+      title: data.title.present ? data.title.value : this.title,
+      isBuiltin: data.isBuiltin.present ? data.isBuiltin.value : this.isBuiltin,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneTargetEntry(')
+          ..write('days: $days, ')
+          ..write('title: $title, ')
+          ..write('isBuiltin: $isBuiltin')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(days, title, isBuiltin);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MilestoneTargetEntry &&
+          other.days == this.days &&
+          other.title == this.title &&
+          other.isBuiltin == this.isBuiltin);
+}
+
+class MilestoneTargetEntriesCompanion
+    extends UpdateCompanion<MilestoneTargetEntry> {
+  final Value<int> days;
+  final Value<String> title;
+  final Value<bool> isBuiltin;
+  const MilestoneTargetEntriesCompanion({
+    this.days = const Value.absent(),
+    this.title = const Value.absent(),
+    this.isBuiltin = const Value.absent(),
+  });
+  MilestoneTargetEntriesCompanion.insert({
+    this.days = const Value.absent(),
+    required String title,
+    this.isBuiltin = const Value.absent(),
+  }) : title = Value(title);
+  static Insertable<MilestoneTargetEntry> custom({
+    Expression<int>? days,
+    Expression<String>? title,
+    Expression<bool>? isBuiltin,
+  }) {
+    return RawValuesInsertable({
+      if (days != null) 'days': days,
+      if (title != null) 'title': title,
+      if (isBuiltin != null) 'is_builtin': isBuiltin,
+    });
+  }
+
+  MilestoneTargetEntriesCompanion copyWith({
+    Value<int>? days,
+    Value<String>? title,
+    Value<bool>? isBuiltin,
+  }) {
+    return MilestoneTargetEntriesCompanion(
+      days: days ?? this.days,
+      title: title ?? this.title,
+      isBuiltin: isBuiltin ?? this.isBuiltin,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (days.present) {
+      map['days'] = Variable<int>(days.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (isBuiltin.present) {
+      map['is_builtin'] = Variable<bool>(isBuiltin.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneTargetEntriesCompanion(')
+          ..write('days: $days, ')
+          ..write('title: $title, ')
+          ..write('isBuiltin: $isBuiltin')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MilestoneAchievementEntriesTable extends MilestoneAchievementEntries
+    with
+        TableInfo<
+          $MilestoneAchievementEntriesTable,
+          MilestoneAchievementEntry
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MilestoneAchievementEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _daysMeta = const VerificationMeta('days');
+  @override
+  late final GeneratedColumn<int> days = GeneratedColumn<int>(
+    'days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _achievedAtMeta = const VerificationMeta(
+    'achievedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> achievedAt = GeneratedColumn<DateTime>(
+    'achieved_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [days, title, achievedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'milestone_achievement_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MilestoneAchievementEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('days')) {
+      context.handle(
+        _daysMeta,
+        days.isAcceptableOrUnknown(data['days']!, _daysMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('achieved_at')) {
+      context.handle(
+        _achievedAtMeta,
+        achievedAt.isAcceptableOrUnknown(data['achieved_at']!, _achievedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_achievedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {days};
+  @override
+  MilestoneAchievementEntry map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MilestoneAchievementEntry(
+      days: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}days'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      achievedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}achieved_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MilestoneAchievementEntriesTable createAlias(String alias) {
+    return $MilestoneAchievementEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class MilestoneAchievementEntry extends DataClass
+    implements Insertable<MilestoneAchievementEntry> {
+  final int days;
+  final String title;
+  final DateTime achievedAt;
+  const MilestoneAchievementEntry({
+    required this.days,
+    required this.title,
+    required this.achievedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['days'] = Variable<int>(days);
+    map['title'] = Variable<String>(title);
+    map['achieved_at'] = Variable<DateTime>(achievedAt);
+    return map;
+  }
+
+  MilestoneAchievementEntriesCompanion toCompanion(bool nullToAbsent) {
+    return MilestoneAchievementEntriesCompanion(
+      days: Value(days),
+      title: Value(title),
+      achievedAt: Value(achievedAt),
+    );
+  }
+
+  factory MilestoneAchievementEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MilestoneAchievementEntry(
+      days: serializer.fromJson<int>(json['days']),
+      title: serializer.fromJson<String>(json['title']),
+      achievedAt: serializer.fromJson<DateTime>(json['achievedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'days': serializer.toJson<int>(days),
+      'title': serializer.toJson<String>(title),
+      'achievedAt': serializer.toJson<DateTime>(achievedAt),
+    };
+  }
+
+  MilestoneAchievementEntry copyWith({
+    int? days,
+    String? title,
+    DateTime? achievedAt,
+  }) => MilestoneAchievementEntry(
+    days: days ?? this.days,
+    title: title ?? this.title,
+    achievedAt: achievedAt ?? this.achievedAt,
+  );
+  MilestoneAchievementEntry copyWithCompanion(
+    MilestoneAchievementEntriesCompanion data,
+  ) {
+    return MilestoneAchievementEntry(
+      days: data.days.present ? data.days.value : this.days,
+      title: data.title.present ? data.title.value : this.title,
+      achievedAt: data.achievedAt.present
+          ? data.achievedAt.value
+          : this.achievedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneAchievementEntry(')
+          ..write('days: $days, ')
+          ..write('title: $title, ')
+          ..write('achievedAt: $achievedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(days, title, achievedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MilestoneAchievementEntry &&
+          other.days == this.days &&
+          other.title == this.title &&
+          other.achievedAt == this.achievedAt);
+}
+
+class MilestoneAchievementEntriesCompanion
+    extends UpdateCompanion<MilestoneAchievementEntry> {
+  final Value<int> days;
+  final Value<String> title;
+  final Value<DateTime> achievedAt;
+  const MilestoneAchievementEntriesCompanion({
+    this.days = const Value.absent(),
+    this.title = const Value.absent(),
+    this.achievedAt = const Value.absent(),
+  });
+  MilestoneAchievementEntriesCompanion.insert({
+    this.days = const Value.absent(),
+    required String title,
+    required DateTime achievedAt,
+  }) : title = Value(title),
+       achievedAt = Value(achievedAt);
+  static Insertable<MilestoneAchievementEntry> custom({
+    Expression<int>? days,
+    Expression<String>? title,
+    Expression<DateTime>? achievedAt,
+  }) {
+    return RawValuesInsertable({
+      if (days != null) 'days': days,
+      if (title != null) 'title': title,
+      if (achievedAt != null) 'achieved_at': achievedAt,
+    });
+  }
+
+  MilestoneAchievementEntriesCompanion copyWith({
+    Value<int>? days,
+    Value<String>? title,
+    Value<DateTime>? achievedAt,
+  }) {
+    return MilestoneAchievementEntriesCompanion(
+      days: days ?? this.days,
+      title: title ?? this.title,
+      achievedAt: achievedAt ?? this.achievedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (days.present) {
+      map['days'] = Variable<int>(days.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (achievedAt.present) {
+      map['achieved_at'] = Variable<DateTime>(achievedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneAchievementEntriesCompanion(')
+          ..write('days: $days, ')
+          ..write('title: $title, ')
+          ..write('achievedAt: $achievedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1230,6 +1745,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $StreakStateEntriesTable(this);
   late final $WorkoutRecordEntriesTable workoutRecordEntries =
       $WorkoutRecordEntriesTable(this);
+  late final $MilestoneTargetEntriesTable milestoneTargetEntries =
+      $MilestoneTargetEntriesTable(this);
+  late final $MilestoneAchievementEntriesTable milestoneAchievementEntries =
+      $MilestoneAchievementEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1238,6 +1757,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userProgressEntries,
     streakStateEntries,
     workoutRecordEntries,
+    milestoneTargetEntries,
+    milestoneAchievementEntries,
   ];
 }
 
@@ -1930,6 +2451,358 @@ typedef $$WorkoutRecordEntriesTableProcessedTableManager =
       WorkoutRecordEntry,
       PrefetchHooks Function()
     >;
+typedef $$MilestoneTargetEntriesTableCreateCompanionBuilder =
+    MilestoneTargetEntriesCompanion Function({
+      Value<int> days,
+      required String title,
+      Value<bool> isBuiltin,
+    });
+typedef $$MilestoneTargetEntriesTableUpdateCompanionBuilder =
+    MilestoneTargetEntriesCompanion Function({
+      Value<int> days,
+      Value<String> title,
+      Value<bool> isBuiltin,
+    });
+
+class $$MilestoneTargetEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $MilestoneTargetEntriesTable> {
+  $$MilestoneTargetEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get days => $composableBuilder(
+    column: $table.days,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBuiltin => $composableBuilder(
+    column: $table.isBuiltin,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MilestoneTargetEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MilestoneTargetEntriesTable> {
+  $$MilestoneTargetEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get days => $composableBuilder(
+    column: $table.days,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isBuiltin => $composableBuilder(
+    column: $table.isBuiltin,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MilestoneTargetEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MilestoneTargetEntriesTable> {
+  $$MilestoneTargetEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get days =>
+      $composableBuilder(column: $table.days, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBuiltin =>
+      $composableBuilder(column: $table.isBuiltin, builder: (column) => column);
+}
+
+class $$MilestoneTargetEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MilestoneTargetEntriesTable,
+          MilestoneTargetEntry,
+          $$MilestoneTargetEntriesTableFilterComposer,
+          $$MilestoneTargetEntriesTableOrderingComposer,
+          $$MilestoneTargetEntriesTableAnnotationComposer,
+          $$MilestoneTargetEntriesTableCreateCompanionBuilder,
+          $$MilestoneTargetEntriesTableUpdateCompanionBuilder,
+          (
+            MilestoneTargetEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $MilestoneTargetEntriesTable,
+              MilestoneTargetEntry
+            >,
+          ),
+          MilestoneTargetEntry,
+          PrefetchHooks Function()
+        > {
+  $$MilestoneTargetEntriesTableTableManager(
+    _$AppDatabase db,
+    $MilestoneTargetEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MilestoneTargetEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$MilestoneTargetEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$MilestoneTargetEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> days = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<bool> isBuiltin = const Value.absent(),
+              }) => MilestoneTargetEntriesCompanion(
+                days: days,
+                title: title,
+                isBuiltin: isBuiltin,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> days = const Value.absent(),
+                required String title,
+                Value<bool> isBuiltin = const Value.absent(),
+              }) => MilestoneTargetEntriesCompanion.insert(
+                days: days,
+                title: title,
+                isBuiltin: isBuiltin,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MilestoneTargetEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MilestoneTargetEntriesTable,
+      MilestoneTargetEntry,
+      $$MilestoneTargetEntriesTableFilterComposer,
+      $$MilestoneTargetEntriesTableOrderingComposer,
+      $$MilestoneTargetEntriesTableAnnotationComposer,
+      $$MilestoneTargetEntriesTableCreateCompanionBuilder,
+      $$MilestoneTargetEntriesTableUpdateCompanionBuilder,
+      (
+        MilestoneTargetEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $MilestoneTargetEntriesTable,
+          MilestoneTargetEntry
+        >,
+      ),
+      MilestoneTargetEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$MilestoneAchievementEntriesTableCreateCompanionBuilder =
+    MilestoneAchievementEntriesCompanion Function({
+      Value<int> days,
+      required String title,
+      required DateTime achievedAt,
+    });
+typedef $$MilestoneAchievementEntriesTableUpdateCompanionBuilder =
+    MilestoneAchievementEntriesCompanion Function({
+      Value<int> days,
+      Value<String> title,
+      Value<DateTime> achievedAt,
+    });
+
+class $$MilestoneAchievementEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $MilestoneAchievementEntriesTable> {
+  $$MilestoneAchievementEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get days => $composableBuilder(
+    column: $table.days,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get achievedAt => $composableBuilder(
+    column: $table.achievedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MilestoneAchievementEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MilestoneAchievementEntriesTable> {
+  $$MilestoneAchievementEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get days => $composableBuilder(
+    column: $table.days,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get achievedAt => $composableBuilder(
+    column: $table.achievedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MilestoneAchievementEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MilestoneAchievementEntriesTable> {
+  $$MilestoneAchievementEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get days =>
+      $composableBuilder(column: $table.days, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get achievedAt => $composableBuilder(
+    column: $table.achievedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MilestoneAchievementEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MilestoneAchievementEntriesTable,
+          MilestoneAchievementEntry,
+          $$MilestoneAchievementEntriesTableFilterComposer,
+          $$MilestoneAchievementEntriesTableOrderingComposer,
+          $$MilestoneAchievementEntriesTableAnnotationComposer,
+          $$MilestoneAchievementEntriesTableCreateCompanionBuilder,
+          $$MilestoneAchievementEntriesTableUpdateCompanionBuilder,
+          (
+            MilestoneAchievementEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $MilestoneAchievementEntriesTable,
+              MilestoneAchievementEntry
+            >,
+          ),
+          MilestoneAchievementEntry,
+          PrefetchHooks Function()
+        > {
+  $$MilestoneAchievementEntriesTableTableManager(
+    _$AppDatabase db,
+    $MilestoneAchievementEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MilestoneAchievementEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$MilestoneAchievementEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$MilestoneAchievementEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> days = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime> achievedAt = const Value.absent(),
+              }) => MilestoneAchievementEntriesCompanion(
+                days: days,
+                title: title,
+                achievedAt: achievedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> days = const Value.absent(),
+                required String title,
+                required DateTime achievedAt,
+              }) => MilestoneAchievementEntriesCompanion.insert(
+                days: days,
+                title: title,
+                achievedAt: achievedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MilestoneAchievementEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MilestoneAchievementEntriesTable,
+      MilestoneAchievementEntry,
+      $$MilestoneAchievementEntriesTableFilterComposer,
+      $$MilestoneAchievementEntriesTableOrderingComposer,
+      $$MilestoneAchievementEntriesTableAnnotationComposer,
+      $$MilestoneAchievementEntriesTableCreateCompanionBuilder,
+      $$MilestoneAchievementEntriesTableUpdateCompanionBuilder,
+      (
+        MilestoneAchievementEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $MilestoneAchievementEntriesTable,
+          MilestoneAchievementEntry
+        >,
+      ),
+      MilestoneAchievementEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1940,4 +2813,15 @@ class $AppDatabaseManager {
       $$StreakStateEntriesTableTableManager(_db, _db.streakStateEntries);
   $$WorkoutRecordEntriesTableTableManager get workoutRecordEntries =>
       $$WorkoutRecordEntriesTableTableManager(_db, _db.workoutRecordEntries);
+  $$MilestoneTargetEntriesTableTableManager get milestoneTargetEntries =>
+      $$MilestoneTargetEntriesTableTableManager(
+        _db,
+        _db.milestoneTargetEntries,
+      );
+  $$MilestoneAchievementEntriesTableTableManager
+  get milestoneAchievementEntries =>
+      $$MilestoneAchievementEntriesTableTableManager(
+        _db,
+        _db.milestoneAchievementEntries,
+      );
 }
