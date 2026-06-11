@@ -56,7 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _startPlank(PlankType plankType, int targetSeconds) async {
-    final result = await Navigator.of(context).push<dynamic>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => PlankSessionScreen(
           plankType: plankType,
@@ -65,12 +65,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
 
-    if (result != null && mounted) {
-      ref.invalidate(userProgressProvider);
-      ref.invalidate(streakStateProvider);
-      ref.invalidate(milestoneAchievementsProvider);
-      ref.invalidate(todayWorkoutSummaryProvider);
-    }
+    if (!mounted) return;
+    // 結果画面は pushReplacement 経由のため result は null になり得る。
+    // ホームに戻ったタイミングで常に最新の進捗を読み直す。
+    ref.invalidate(userProgressProvider);
+    ref.invalidate(streakStateProvider);
+    ref.invalidate(milestoneAchievementsProvider);
+    ref.invalidate(todayWorkoutSummaryProvider);
   }
 
   @override
