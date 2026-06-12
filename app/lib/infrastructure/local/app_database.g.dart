@@ -2000,6 +2000,608 @@ class CustomPlankTypeEntriesCompanion
   }
 }
 
+class $CustomPlankSetEntriesTable extends CustomPlankSetEntries
+    with TableInfo<$CustomPlankSetEntriesTable, CustomPlankSetEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomPlankSetEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_plank_set_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CustomPlankSetEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CustomPlankSetEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomPlankSetEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CustomPlankSetEntriesTable createAlias(String alias) {
+    return $CustomPlankSetEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class CustomPlankSetEntry extends DataClass
+    implements Insertable<CustomPlankSetEntry> {
+  final String id;
+  final String name;
+  final DateTime updatedAt;
+  const CustomPlankSetEntry({
+    required this.id,
+    required this.name,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CustomPlankSetEntriesCompanion toCompanion(bool nullToAbsent) {
+    return CustomPlankSetEntriesCompanion(
+      id: Value(id),
+      name: Value(name),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CustomPlankSetEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomPlankSetEntry(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CustomPlankSetEntry copyWith({
+    String? id,
+    String? name,
+    DateTime? updatedAt,
+  }) => CustomPlankSetEntry(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CustomPlankSetEntry copyWithCompanion(CustomPlankSetEntriesCompanion data) {
+    return CustomPlankSetEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomPlankSetEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomPlankSetEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CustomPlankSetEntriesCompanion
+    extends UpdateCompanion<CustomPlankSetEntry> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CustomPlankSetEntriesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CustomPlankSetEntriesCompanion.insert({
+    required String id,
+    required String name,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       updatedAt = Value(updatedAt);
+  static Insertable<CustomPlankSetEntry> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CustomPlankSetEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CustomPlankSetEntriesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomPlankSetEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CustomPlankSetItemEntriesTable extends CustomPlankSetItemEntries
+    with TableInfo<$CustomPlankSetItemEntriesTable, CustomPlankSetItemEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomPlankSetItemEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _setIdMeta = const VerificationMeta('setId');
+  @override
+  late final GeneratedColumn<String> setId = GeneratedColumn<String>(
+    'set_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES custom_plank_set_entries (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _plankTypeIdMeta = const VerificationMeta(
+    'plankTypeId',
+  );
+  @override
+  late final GeneratedColumn<String> plankTypeId = GeneratedColumn<String>(
+    'plank_type_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetSecondsMeta = const VerificationMeta(
+    'targetSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> targetSeconds = GeneratedColumn<int>(
+    'target_seconds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    setId,
+    sortOrder,
+    plankTypeId,
+    targetSeconds,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_plank_set_item_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CustomPlankSetItemEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('set_id')) {
+      context.handle(
+        _setIdMeta,
+        setId.isAcceptableOrUnknown(data['set_id']!, _setIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_setIdMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('plank_type_id')) {
+      context.handle(
+        _plankTypeIdMeta,
+        plankTypeId.isAcceptableOrUnknown(
+          data['plank_type_id']!,
+          _plankTypeIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_plankTypeIdMeta);
+    }
+    if (data.containsKey('target_seconds')) {
+      context.handle(
+        _targetSecondsMeta,
+        targetSeconds.isAcceptableOrUnknown(
+          data['target_seconds']!,
+          _targetSecondsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_targetSecondsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {setId, sortOrder};
+  @override
+  CustomPlankSetItemEntry map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomPlankSetItemEntry(
+      setId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}set_id'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      plankTypeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}plank_type_id'],
+      )!,
+      targetSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_seconds'],
+      )!,
+    );
+  }
+
+  @override
+  $CustomPlankSetItemEntriesTable createAlias(String alias) {
+    return $CustomPlankSetItemEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class CustomPlankSetItemEntry extends DataClass
+    implements Insertable<CustomPlankSetItemEntry> {
+  final String setId;
+  final int sortOrder;
+  final String plankTypeId;
+  final int targetSeconds;
+  const CustomPlankSetItemEntry({
+    required this.setId,
+    required this.sortOrder,
+    required this.plankTypeId,
+    required this.targetSeconds,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['set_id'] = Variable<String>(setId);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['plank_type_id'] = Variable<String>(plankTypeId);
+    map['target_seconds'] = Variable<int>(targetSeconds);
+    return map;
+  }
+
+  CustomPlankSetItemEntriesCompanion toCompanion(bool nullToAbsent) {
+    return CustomPlankSetItemEntriesCompanion(
+      setId: Value(setId),
+      sortOrder: Value(sortOrder),
+      plankTypeId: Value(plankTypeId),
+      targetSeconds: Value(targetSeconds),
+    );
+  }
+
+  factory CustomPlankSetItemEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomPlankSetItemEntry(
+      setId: serializer.fromJson<String>(json['setId']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      plankTypeId: serializer.fromJson<String>(json['plankTypeId']),
+      targetSeconds: serializer.fromJson<int>(json['targetSeconds']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'setId': serializer.toJson<String>(setId),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'plankTypeId': serializer.toJson<String>(plankTypeId),
+      'targetSeconds': serializer.toJson<int>(targetSeconds),
+    };
+  }
+
+  CustomPlankSetItemEntry copyWith({
+    String? setId,
+    int? sortOrder,
+    String? plankTypeId,
+    int? targetSeconds,
+  }) => CustomPlankSetItemEntry(
+    setId: setId ?? this.setId,
+    sortOrder: sortOrder ?? this.sortOrder,
+    plankTypeId: plankTypeId ?? this.plankTypeId,
+    targetSeconds: targetSeconds ?? this.targetSeconds,
+  );
+  CustomPlankSetItemEntry copyWithCompanion(
+    CustomPlankSetItemEntriesCompanion data,
+  ) {
+    return CustomPlankSetItemEntry(
+      setId: data.setId.present ? data.setId.value : this.setId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      plankTypeId: data.plankTypeId.present
+          ? data.plankTypeId.value
+          : this.plankTypeId,
+      targetSeconds: data.targetSeconds.present
+          ? data.targetSeconds.value
+          : this.targetSeconds,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomPlankSetItemEntry(')
+          ..write('setId: $setId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('plankTypeId: $plankTypeId, ')
+          ..write('targetSeconds: $targetSeconds')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(setId, sortOrder, plankTypeId, targetSeconds);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomPlankSetItemEntry &&
+          other.setId == this.setId &&
+          other.sortOrder == this.sortOrder &&
+          other.plankTypeId == this.plankTypeId &&
+          other.targetSeconds == this.targetSeconds);
+}
+
+class CustomPlankSetItemEntriesCompanion
+    extends UpdateCompanion<CustomPlankSetItemEntry> {
+  final Value<String> setId;
+  final Value<int> sortOrder;
+  final Value<String> plankTypeId;
+  final Value<int> targetSeconds;
+  final Value<int> rowid;
+  const CustomPlankSetItemEntriesCompanion({
+    this.setId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.plankTypeId = const Value.absent(),
+    this.targetSeconds = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CustomPlankSetItemEntriesCompanion.insert({
+    required String setId,
+    required int sortOrder,
+    required String plankTypeId,
+    required int targetSeconds,
+    this.rowid = const Value.absent(),
+  }) : setId = Value(setId),
+       sortOrder = Value(sortOrder),
+       plankTypeId = Value(plankTypeId),
+       targetSeconds = Value(targetSeconds);
+  static Insertable<CustomPlankSetItemEntry> custom({
+    Expression<String>? setId,
+    Expression<int>? sortOrder,
+    Expression<String>? plankTypeId,
+    Expression<int>? targetSeconds,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (setId != null) 'set_id': setId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (plankTypeId != null) 'plank_type_id': plankTypeId,
+      if (targetSeconds != null) 'target_seconds': targetSeconds,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CustomPlankSetItemEntriesCompanion copyWith({
+    Value<String>? setId,
+    Value<int>? sortOrder,
+    Value<String>? plankTypeId,
+    Value<int>? targetSeconds,
+    Value<int>? rowid,
+  }) {
+    return CustomPlankSetItemEntriesCompanion(
+      setId: setId ?? this.setId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      plankTypeId: plankTypeId ?? this.plankTypeId,
+      targetSeconds: targetSeconds ?? this.targetSeconds,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (setId.present) {
+      map['set_id'] = Variable<String>(setId.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (plankTypeId.present) {
+      map['plank_type_id'] = Variable<String>(plankTypeId.value);
+    }
+    if (targetSeconds.present) {
+      map['target_seconds'] = Variable<int>(targetSeconds.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomPlankSetItemEntriesCompanion(')
+          ..write('setId: $setId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('plankTypeId: $plankTypeId, ')
+          ..write('targetSeconds: $targetSeconds, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2015,6 +2617,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $MilestoneAchievementEntriesTable(this);
   late final $CustomPlankTypeEntriesTable customPlankTypeEntries =
       $CustomPlankTypeEntriesTable(this);
+  late final $CustomPlankSetEntriesTable customPlankSetEntries =
+      $CustomPlankSetEntriesTable(this);
+  late final $CustomPlankSetItemEntriesTable customPlankSetItemEntries =
+      $CustomPlankSetItemEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2026,7 +2632,21 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     milestoneTargetEntries,
     milestoneAchievementEntries,
     customPlankTypeEntries,
+    customPlankSetEntries,
+    customPlankSetItemEntries,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'custom_plank_set_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('custom_plank_set_item_entries', kind: UpdateKind.delete),
+      ],
+    ),
+  ]);
 }
 
 typedef $$UserProgressEntriesTableCreateCompanionBuilder =
@@ -3251,6 +3871,637 @@ typedef $$CustomPlankTypeEntriesTableProcessedTableManager =
       CustomPlankTypeEntry,
       PrefetchHooks Function()
     >;
+typedef $$CustomPlankSetEntriesTableCreateCompanionBuilder =
+    CustomPlankSetEntriesCompanion Function({
+      required String id,
+      required String name,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CustomPlankSetEntriesTableUpdateCompanionBuilder =
+    CustomPlankSetEntriesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$CustomPlankSetEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CustomPlankSetEntriesTable,
+          CustomPlankSetEntry
+        > {
+  $$CustomPlankSetEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $CustomPlankSetItemEntriesTable,
+    List<CustomPlankSetItemEntry>
+  >
+  _customPlankSetItemEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.customPlankSetItemEntries,
+        aliasName: $_aliasNameGenerator(
+          db.customPlankSetEntries.id,
+          db.customPlankSetItemEntries.setId,
+        ),
+      );
+
+  $$CustomPlankSetItemEntriesTableProcessedTableManager
+  get customPlankSetItemEntriesRefs {
+    final manager = $$CustomPlankSetItemEntriesTableTableManager(
+      $_db,
+      $_db.customPlankSetItemEntries,
+    ).filter((f) => f.setId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _customPlankSetItemEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CustomPlankSetEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetEntriesTable> {
+  $$CustomPlankSetEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> customPlankSetItemEntriesRefs(
+    Expression<bool> Function($$CustomPlankSetItemEntriesTableFilterComposer f)
+    f,
+  ) {
+    final $$CustomPlankSetItemEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.customPlankSetItemEntries,
+          getReferencedColumn: (t) => t.setId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CustomPlankSetItemEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.customPlankSetItemEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CustomPlankSetEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetEntriesTable> {
+  $$CustomPlankSetEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CustomPlankSetEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetEntriesTable> {
+  $$CustomPlankSetEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> customPlankSetItemEntriesRefs<T extends Object>(
+    Expression<T> Function($$CustomPlankSetItemEntriesTableAnnotationComposer a)
+    f,
+  ) {
+    final $$CustomPlankSetItemEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.customPlankSetItemEntries,
+          getReferencedColumn: (t) => t.setId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CustomPlankSetItemEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.customPlankSetItemEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CustomPlankSetEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CustomPlankSetEntriesTable,
+          CustomPlankSetEntry,
+          $$CustomPlankSetEntriesTableFilterComposer,
+          $$CustomPlankSetEntriesTableOrderingComposer,
+          $$CustomPlankSetEntriesTableAnnotationComposer,
+          $$CustomPlankSetEntriesTableCreateCompanionBuilder,
+          $$CustomPlankSetEntriesTableUpdateCompanionBuilder,
+          (CustomPlankSetEntry, $$CustomPlankSetEntriesTableReferences),
+          CustomPlankSetEntry,
+          PrefetchHooks Function({bool customPlankSetItemEntriesRefs})
+        > {
+  $$CustomPlankSetEntriesTableTableManager(
+    _$AppDatabase db,
+    $CustomPlankSetEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomPlankSetEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CustomPlankSetEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CustomPlankSetEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CustomPlankSetEntriesCompanion(
+                id: id,
+                name: name,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CustomPlankSetEntriesCompanion.insert(
+                id: id,
+                name: name,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CustomPlankSetEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({customPlankSetItemEntriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (customPlankSetItemEntriesRefs) db.customPlankSetItemEntries,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (customPlankSetItemEntriesRefs)
+                    await $_getPrefetchedData<
+                      CustomPlankSetEntry,
+                      $CustomPlankSetEntriesTable,
+                      CustomPlankSetItemEntry
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CustomPlankSetEntriesTableReferences
+                          ._customPlankSetItemEntriesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CustomPlankSetEntriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).customPlankSetItemEntriesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.setId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CustomPlankSetEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CustomPlankSetEntriesTable,
+      CustomPlankSetEntry,
+      $$CustomPlankSetEntriesTableFilterComposer,
+      $$CustomPlankSetEntriesTableOrderingComposer,
+      $$CustomPlankSetEntriesTableAnnotationComposer,
+      $$CustomPlankSetEntriesTableCreateCompanionBuilder,
+      $$CustomPlankSetEntriesTableUpdateCompanionBuilder,
+      (CustomPlankSetEntry, $$CustomPlankSetEntriesTableReferences),
+      CustomPlankSetEntry,
+      PrefetchHooks Function({bool customPlankSetItemEntriesRefs})
+    >;
+typedef $$CustomPlankSetItemEntriesTableCreateCompanionBuilder =
+    CustomPlankSetItemEntriesCompanion Function({
+      required String setId,
+      required int sortOrder,
+      required String plankTypeId,
+      required int targetSeconds,
+      Value<int> rowid,
+    });
+typedef $$CustomPlankSetItemEntriesTableUpdateCompanionBuilder =
+    CustomPlankSetItemEntriesCompanion Function({
+      Value<String> setId,
+      Value<int> sortOrder,
+      Value<String> plankTypeId,
+      Value<int> targetSeconds,
+      Value<int> rowid,
+    });
+
+final class $$CustomPlankSetItemEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CustomPlankSetItemEntriesTable,
+          CustomPlankSetItemEntry
+        > {
+  $$CustomPlankSetItemEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CustomPlankSetEntriesTable _setIdTable(_$AppDatabase db) =>
+      db.customPlankSetEntries.createAlias(
+        $_aliasNameGenerator(
+          db.customPlankSetItemEntries.setId,
+          db.customPlankSetEntries.id,
+        ),
+      );
+
+  $$CustomPlankSetEntriesTableProcessedTableManager get setId {
+    final $_column = $_itemColumn<String>('set_id')!;
+
+    final manager = $$CustomPlankSetEntriesTableTableManager(
+      $_db,
+      $_db.customPlankSetEntries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_setIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CustomPlankSetItemEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetItemEntriesTable> {
+  $$CustomPlankSetItemEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get plankTypeId => $composableBuilder(
+    column: $table.plankTypeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetSeconds => $composableBuilder(
+    column: $table.targetSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CustomPlankSetEntriesTableFilterComposer get setId {
+    final $$CustomPlankSetEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.setId,
+          referencedTable: $db.customPlankSetEntries,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CustomPlankSetEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.customPlankSetEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CustomPlankSetItemEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetItemEntriesTable> {
+  $$CustomPlankSetItemEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get plankTypeId => $composableBuilder(
+    column: $table.plankTypeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get targetSeconds => $composableBuilder(
+    column: $table.targetSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CustomPlankSetEntriesTableOrderingComposer get setId {
+    final $$CustomPlankSetEntriesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.setId,
+          referencedTable: $db.customPlankSetEntries,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CustomPlankSetEntriesTableOrderingComposer(
+                $db: $db,
+                $table: $db.customPlankSetEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CustomPlankSetItemEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomPlankSetItemEntriesTable> {
+  $$CustomPlankSetItemEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get plankTypeId => $composableBuilder(
+    column: $table.plankTypeId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get targetSeconds => $composableBuilder(
+    column: $table.targetSeconds,
+    builder: (column) => column,
+  );
+
+  $$CustomPlankSetEntriesTableAnnotationComposer get setId {
+    final $$CustomPlankSetEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.setId,
+          referencedTable: $db.customPlankSetEntries,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CustomPlankSetEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.customPlankSetEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CustomPlankSetItemEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CustomPlankSetItemEntriesTable,
+          CustomPlankSetItemEntry,
+          $$CustomPlankSetItemEntriesTableFilterComposer,
+          $$CustomPlankSetItemEntriesTableOrderingComposer,
+          $$CustomPlankSetItemEntriesTableAnnotationComposer,
+          $$CustomPlankSetItemEntriesTableCreateCompanionBuilder,
+          $$CustomPlankSetItemEntriesTableUpdateCompanionBuilder,
+          (CustomPlankSetItemEntry, $$CustomPlankSetItemEntriesTableReferences),
+          CustomPlankSetItemEntry,
+          PrefetchHooks Function({bool setId})
+        > {
+  $$CustomPlankSetItemEntriesTableTableManager(
+    _$AppDatabase db,
+    $CustomPlankSetItemEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomPlankSetItemEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CustomPlankSetItemEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CustomPlankSetItemEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> setId = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> plankTypeId = const Value.absent(),
+                Value<int> targetSeconds = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CustomPlankSetItemEntriesCompanion(
+                setId: setId,
+                sortOrder: sortOrder,
+                plankTypeId: plankTypeId,
+                targetSeconds: targetSeconds,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String setId,
+                required int sortOrder,
+                required String plankTypeId,
+                required int targetSeconds,
+                Value<int> rowid = const Value.absent(),
+              }) => CustomPlankSetItemEntriesCompanion.insert(
+                setId: setId,
+                sortOrder: sortOrder,
+                plankTypeId: plankTypeId,
+                targetSeconds: targetSeconds,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CustomPlankSetItemEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({setId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (setId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.setId,
+                                referencedTable:
+                                    $$CustomPlankSetItemEntriesTableReferences
+                                        ._setIdTable(db),
+                                referencedColumn:
+                                    $$CustomPlankSetItemEntriesTableReferences
+                                        ._setIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CustomPlankSetItemEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CustomPlankSetItemEntriesTable,
+      CustomPlankSetItemEntry,
+      $$CustomPlankSetItemEntriesTableFilterComposer,
+      $$CustomPlankSetItemEntriesTableOrderingComposer,
+      $$CustomPlankSetItemEntriesTableAnnotationComposer,
+      $$CustomPlankSetItemEntriesTableCreateCompanionBuilder,
+      $$CustomPlankSetItemEntriesTableUpdateCompanionBuilder,
+      (CustomPlankSetItemEntry, $$CustomPlankSetItemEntriesTableReferences),
+      CustomPlankSetItemEntry,
+      PrefetchHooks Function({bool setId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3276,5 +4527,12 @@ class $AppDatabaseManager {
       $$CustomPlankTypeEntriesTableTableManager(
         _db,
         _db.customPlankTypeEntries,
+      );
+  $$CustomPlankSetEntriesTableTableManager get customPlankSetEntries =>
+      $$CustomPlankSetEntriesTableTableManager(_db, _db.customPlankSetEntries);
+  $$CustomPlankSetItemEntriesTableTableManager get customPlankSetItemEntries =>
+      $$CustomPlankSetItemEntriesTableTableManager(
+        _db,
+        _db.customPlankSetItemEntries,
       );
 }

@@ -11,12 +11,14 @@ class PlankSetDetailPanel extends StatelessWidget {
     required this.plankTypes,
     required this.targetSecondsByPlankId,
     required this.onTargetSecondsChanged,
+    this.onEdit,
   });
 
   final String setName;
   final List<PlankType> plankTypes;
   final Map<String, int> targetSecondsByPlankId;
   final void Function(String plankId, int seconds) onTargetSecondsChanged;
+  final VoidCallback? onEdit;
 
   PlankType? get _basicPlank {
     for (final plank in plankTypes) {
@@ -41,12 +43,26 @@ class PlankSetDetailPanel extends StatelessWidget {
               showLabel: false,
             ),
           const SizedBox(height: 16),
-          Text(
-            setName,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  setName,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
                 ),
-            textAlign: TextAlign.center,
+              ),
+              if (onEdit != null)
+                IconButton(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: "セットを編集",
+                  visualDensity: VisualDensity.compact,
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           for (final plank in plankTypes)

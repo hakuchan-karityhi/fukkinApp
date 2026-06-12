@@ -7,6 +7,7 @@ import "../../domain/models/plank_result.dart";
 import "../../domain/models/plank_set.dart";
 import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_exercise_timer.dart";
+import "../plank_session/plank_session_header.dart";
 import "../widgets/plank_pose_view.dart";
 import "plank_set_result_screen.dart";
 
@@ -142,21 +143,14 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _currentPlank.name,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        appBar: AppBar(),
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Center(
             child: _awaitingAction && lastResult != null
                 ? _PlankCompletedPanel(
                     plankType: _currentPlank,
+                    setName: widget.plankSet.name,
                     progressLabel: "${_currentIndex + 1}/$_totalCount",
                     earnedExp: lastResult.earnedExp,
                     showNextButton: !_isLastPlank,
@@ -167,6 +161,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
                     key: ValueKey(_currentIndex),
                     plankType: _currentPlank,
                     targetSeconds: _currentTargetSeconds,
+                    setName: widget.plankSet.name,
                     progressLabel: "${_currentIndex + 1}/$_totalCount",
                     onExitConfirmed: () async {
                       if (await _confirmAbortSet()) {
@@ -185,6 +180,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
 class _PlankCompletedPanel extends StatelessWidget {
   const _PlankCompletedPanel({
     required this.plankType,
+    required this.setName,
     required this.progressLabel,
     required this.earnedExp,
     required this.showNextButton,
@@ -193,6 +189,7 @@ class _PlankCompletedPanel extends StatelessWidget {
   });
 
   final PlankType plankType;
+  final String setName;
   final String progressLabel;
   final int earnedExp;
   final bool showNextButton;
@@ -208,14 +205,12 @@ class _PlankCompletedPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            progressLabel,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
+          PlankSessionHeader(
+            plankName: plankType.name,
+            setName: setName,
+            progressLabel: progressLabel,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           PlankPoseView(
             plankType: plankType,
             size: 200,
