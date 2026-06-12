@@ -2,6 +2,8 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "../records/widgets/milestone_debug_panel.dart";
+import "../records/widgets/streak_debug_panel.dart";
 import "../../app/providers.dart";
 
 class SettingsScreen extends ConsumerWidget {
@@ -88,39 +90,43 @@ class _DebugSectionState extends ConsumerState<_DebugSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.35),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "デバッグ",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "開発ビルドのみ表示されます。",
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _isResetting ? null : _confirmAndReset,
-              icon: _isResetting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.restart_alt),
-              label: Text(_isResetting ? "リセット中…" : "進捗を全てリセット"),
-            ),
-          ],
+    final targetsAsync = ref.watch(milestoneTargetsProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "デバッグ",
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          "開発ビルドのみ表示されます。",
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: _isResetting ? null : _confirmAndReset,
+          icon: _isResetting
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.restart_alt),
+          label: Text(_isResetting ? "リセット中…" : "進捗を全てリセット"),
+        ),
+        const SizedBox(height: 16),
+        const StreakDebugPanel(),
+        const SizedBox(height: 16),
+        targetsAsync.when(
+          data: (targets) => MilestoneDebugPanel(targets: targets),
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }
