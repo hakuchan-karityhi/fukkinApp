@@ -153,29 +153,29 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(24),
-          child: Center(
-            child: _awaitingAction && lastResult != null
-                ? _PlankCompletedPanel(
+          child: _awaitingAction && lastResult != null
+              ? Center(
+                  child: _PlankCompletedPanel(
                     plankType: _currentPlank,
                     progressLabel: "${_currentIndex + 1}/$_totalCount",
                     earnedExp: lastResult.earnedExp,
                     showNextButton: !_isLastPlank,
                     onNext: _goToNextPlank,
                     onFinish: _goToResultScreen,
-                  )
-                : PlankExerciseTimer(
-                    key: ValueKey(_currentIndex),
-                    plankType: _currentPlank,
-                    targetSeconds: _currentTargetSeconds,
-                    progressLabel: "${_currentIndex + 1}/$_totalCount",
-                    onExitConfirmed: () async {
-                      if (await _confirmAbortSet()) {
-                        await _exitToHome();
-                      }
-                    },
-                    onTimerComplete: _onPlankCompleted,
                   ),
-          ),
+                )
+              : PlankExerciseTimer(
+                  key: ValueKey(_currentIndex),
+                  plankType: _currentPlank,
+                  targetSeconds: _currentTargetSeconds,
+                  progressLabel: "${_currentIndex + 1}/$_totalCount",
+                  onExitConfirmed: () async {
+                    if (await _confirmAbortSet()) {
+                      await _exitToHome();
+                    }
+                  },
+                  onTimerComplete: _onPlankCompleted,
+                ),
         ),
       ),
     );

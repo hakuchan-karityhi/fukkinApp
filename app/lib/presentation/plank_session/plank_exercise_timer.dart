@@ -209,48 +209,65 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
     final displaySeconds =
         _phase == PlankSessionPhase.preparing ? _preparingCount : _remainingSeconds;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.progressLabel != null) ...[
-          Text(
-            widget.progressLabel!,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: double.infinity,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+            if (widget.progressLabel != null) ...[
+              Text(
+                widget.progressLabel!,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            PlankPoseView(
+              plankType: widget.plankType,
+              size: 200,
+              showLabel: false,
+            ),
+            if (cheerText != null) ...[
+              const SizedBox(height: 12),
+              DialogueBubble(text: cheerText),
+            ],
+            const SizedBox(height: 16),
+            if (_phase == PlankSessionPhase.preparing)
+              Text(
+                "開始まで",
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            Text(
+              "$displaySeconds",
+              style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
+            ),
+            Text(_phase == PlankSessionPhase.preparing ? "" : "秒"),
+            const SizedBox(height: 24),
+            _buildActionButtons(),
+              ],
+            ),
+          ),
+          if (kDebugMode && _phase != PlankSessionPhase.completing)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: TextButton(
+                onPressed: _debugComplete,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-          ),
-          const SizedBox(height: 8),
+                child: const Text("debug"),
+              ),
+            ),
         ],
-        PlankPoseView(
-          plankType: widget.plankType,
-          size: 200,
-          showLabel: false,
-        ),
-        if (cheerText != null) ...[
-          const SizedBox(height: 12),
-          DialogueBubble(text: cheerText),
-        ],
-        const SizedBox(height: 16),
-        if (_phase == PlankSessionPhase.preparing)
-          Text(
-            "開始まで",
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        Text(
-          "$displaySeconds",
-          style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
-        ),
-        Text(_phase == PlankSessionPhase.preparing ? "" : "秒"),
-        const SizedBox(height: 24),
-        _buildActionButtons(),
-        if (kDebugMode && _phase != PlankSessionPhase.completing) ...[
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: _debugComplete,
-            child: const Text("DEBUG: 完了"),
-          ),
-        ],
-      ],
+      ),
     );
   }
 
