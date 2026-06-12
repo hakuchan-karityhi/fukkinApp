@@ -7,12 +7,8 @@ import "../../domain/models/plank_result.dart";
 import "../../domain/models/plank_set.dart";
 import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_exercise_timer.dart";
+import "../widgets/plank_pose_view.dart";
 import "plank_set_result_screen.dart";
-
-enum _PlankSetStep {
-  exercising,
-  transition,
-}
 
 class PlankSetSessionScreen extends ConsumerStatefulWidget {
   const PlankSetSessionScreen({
@@ -33,7 +29,7 @@ class PlankSetSessionScreen extends ConsumerStatefulWidget {
 
 class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
   var _currentIndex = 0;
-  var _step = _PlankSetStep.exercising;
+  var _awaitingAction = false;
   final _completedResults = <PlankResult>[];
 
   int get _totalCount => widget.plankTypes.length;
@@ -85,31 +81,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
     _completedResults.add(result);
 
     if (!mounted) return;
-
-    if (_isLastPlank) {
-      final setResult = PlankSetResult(
-        setId: widget.plankSet.id,
-        setName: widget.plankSet.name,
-        targetSeconds: widget.targetSeconds,
-        plankResults: List.unmodifiable(_completedResults),
-        totalEarnedExp: _completedResults.fold(0, (sum, item) => sum + item.earnedExp),
-        totalExpAfter: result.totalExpAfter,
-        levelAfter: result.levelAfter,
-        levelUp: _completedResults.any((item) => item.levelUp),
-        streakAfter: result.streakAfter,
-        streakIncreased: _completedResults.any((item) => item.streakIncreased),
-        milestoneReached: _firstMilestone(_completedResults),
-      );
-
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => PlankSetResultScreen(result: setResult),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _step = _PlankSetStep.transition);
+    setState(() => _awaitingAction = true);
   }
 
   MilestoneAchievement? _firstMilestone(List<PlankResult> results) {
@@ -121,15 +93,45 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
     return null;
   }
 
+  Future<void> _goToResultScreen() async {
+    if (_completedResults.isEmpty || !mounted) return;
+
+    final lastResult = _completedResults.last;
+    final setResult = PlankSetResult(
+      setId: widget.plankSet.id,
+      setName: widget.plankSet.name,
+      targetSeconds: widget.targetSeconds,
+      plankResults: List.unmodifiable(_completedResults),
+      totalEarnedExp:
+          _completedResults.fold(0, (sum, item) => sum + item.earnedExp),
+      totalExpAfter: lastResult.totalExpAfter,
+      levelAfter: lastResult.levelAfter,
+      levelUp: _completedResults.any((item) => item.levelUp),
+      streakAfter: lastResult.streakAfter,
+      streakIncreased:
+          _completedResults.any((item) => item.streakIncreased),
+      milestoneReached: _firstMilestone(_completedResults),
+    );
+
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => PlankSetResultScreen(result: setResult),
+      ),
+    );
+  }
+
   void _goToNextPlank() {
     setState(() {
       _currentIndex++;
-      _step = _PlankSetStep.exercising;
+      _awaitingAction = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final lastResult =
+        _completedResults.isEmpty ? null : _completedResults.last;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -141,7 +143,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.plankSet.name,
+            _currentPlank.name,
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -151,8 +153,16 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Center(
-            child: _step == _PlankSetStep.exercising
-                ? PlankExerciseTimer(
+            child: _awaitingAction && lastResult != null
+                ? _PlankCompletedPanel(
+                    plankType: _currentPlank,
+                    progressLabel: "${_currentIndex + 1}/$_totalCount",
+                    earnedExp: lastResult.earnedExp,
+                    showNextButton: !_isLastPlank,
+                    onNext: _goToNextPlank,
+                    onFinish: _goToResultScreen,
+                  )
+                : PlankExerciseTimer(
                     key: ValueKey(_currentIndex),
                     plankType: _currentPlank,
                     targetSeconds: widget.targetSeconds,
@@ -163,14 +173,6 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
                       }
                     },
                     onTimerComplete: _onPlankCompleted,
-                  )
-                : _TransitionPanel(
-                    completedPlank: _currentPlank,
-                    nextPlank: widget.plankTypes[_currentIndex + 1],
-                    currentIndex: _currentIndex,
-                    totalCount: _totalCount,
-                    earnedExp: _completedResults.last.earnedExp,
-                    onNext: _goToNextPlank,
                   ),
           ),
         ),
@@ -179,22 +181,22 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
   }
 }
 
-class _TransitionPanel extends StatelessWidget {
-  const _TransitionPanel({
-    required this.completedPlank,
-    required this.nextPlank,
-    required this.currentIndex,
-    required this.totalCount,
+class _PlankCompletedPanel extends StatelessWidget {
+  const _PlankCompletedPanel({
+    required this.plankType,
+    required this.progressLabel,
     required this.earnedExp,
+    required this.showNextButton,
     required this.onNext,
+    required this.onFinish,
   });
 
-  final PlankType completedPlank;
-  final PlankType nextPlank;
-  final int currentIndex;
-  final int totalCount;
+  final PlankType plankType;
+  final String progressLabel;
   final int earnedExp;
+  final bool showNextButton;
   final VoidCallback onNext;
+  final VoidCallback onFinish;
 
   @override
   Widget build(BuildContext context) {
@@ -206,37 +208,46 @@ class _TransitionPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "${currentIndex + 1}/$totalCount 完了",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            progressLabel,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
+          PlankPoseView(
+            plankType: plankType,
+            size: 200,
+            showLabel: false,
+          ),
+          const SizedBox(height: 16),
           Text(
-            completedPlank.name,
-            style: Theme.of(context).textTheme.titleMedium,
+            "完了",
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
             "+$earnedExp EXP",
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          Text(
-            "次: ${nextPlank.name}",
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
           const SizedBox(height: 32),
-          FilledButton(
-            onPressed: onNext,
-            child: const Text("次の種目へ"),
+          if (showNextButton) ...[
+            FilledButton(
+              onPressed: onNext,
+              child: const Text("次の種目へ"),
+            ),
+            const SizedBox(height: 12),
+          ],
+          OutlinedButton(
+            onPressed: onFinish,
+            child: const Text("終了"),
           ),
         ],
       ),
