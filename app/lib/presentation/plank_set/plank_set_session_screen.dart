@@ -150,27 +150,29 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(24),
-          child: _step == _PlankSetStep.exercising
-              ? PlankExerciseTimer(
-                  key: ValueKey(_currentIndex),
-                  plankType: _currentPlank,
-                  targetSeconds: widget.targetSeconds,
-                  progressLabel: "${_currentIndex + 1}/$_totalCount",
-                  onExitConfirmed: () async {
-                    if (await _confirmAbortSet()) {
-                      await _exitToHome();
-                    }
-                  },
-                  onTimerComplete: _onPlankCompleted,
-                )
-              : _TransitionPanel(
-                  completedPlank: _currentPlank,
-                  nextPlank: widget.plankTypes[_currentIndex + 1],
-                  currentIndex: _currentIndex,
-                  totalCount: _totalCount,
-                  earnedExp: _completedResults.last.earnedExp,
-                  onNext: _goToNextPlank,
-                ),
+          child: Center(
+            child: _step == _PlankSetStep.exercising
+                ? PlankExerciseTimer(
+                    key: ValueKey(_currentIndex),
+                    plankType: _currentPlank,
+                    targetSeconds: widget.targetSeconds,
+                    progressLabel: "${_currentIndex + 1}/$_totalCount",
+                    onExitConfirmed: () async {
+                      if (await _confirmAbortSet()) {
+                        await _exitToHome();
+                      }
+                    },
+                    onTimerComplete: _onPlankCompleted,
+                  )
+                : _TransitionPanel(
+                    completedPlank: _currentPlank,
+                    nextPlank: widget.plankTypes[_currentIndex + 1],
+                    currentIndex: _currentIndex,
+                    totalCount: _totalCount,
+                    earnedExp: _completedResults.last.earnedExp,
+                    onNext: _goToNextPlank,
+                  ),
+          ),
         ),
       ),
     );
@@ -196,39 +198,48 @@ class _TransitionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "${currentIndex + 1}/$totalCount 完了",
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          completedPlank.name,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          "+$earnedExp EXP",
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          "次: ${nextPlank.name}",
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 32),
-        FilledButton(
-          onPressed: onNext,
-          child: const Text("次の種目へ"),
-        ),
-      ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${currentIndex + 1}/$totalCount 完了",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            completedPlank.name,
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "+$earnedExp EXP",
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "次: ${nextPlank.name}",
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          FilledButton(
+            onPressed: onNext,
+            child: const Text("次の種目へ"),
+          ),
+        ],
+      ),
     );
   }
 }
