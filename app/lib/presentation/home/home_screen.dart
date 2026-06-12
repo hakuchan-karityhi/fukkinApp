@@ -4,9 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_session_screen.dart";
+import "../plank_set/plank_set_session_screen.dart";
 import "widgets/character_panel.dart";
 import "widgets/exercise_panel.dart";
 import "widgets/home_header.dart";
+import "widgets/plank_set_panel.dart";
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -35,7 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _onPageChanged(int page, List<PlankType> plankTypes) {
     setState(() => _currentPage = page);
-    if (page > 0) {
+    if (page > 0 && page <= plankTypes.length) {
       final plankIndex = page - 1;
       ref.read(selectedPlankIndexProvider.notifier).state = plankIndex;
       ref.read(targetSecondsProvider.notifier).state =
@@ -43,15 +45,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  VoidCallback? _onPreviousPage(int plankCount) {
+  VoidCallback? _onPreviousPage(int exerciseCount) {
     if (_currentPage == 0) return null;
     if (_currentPage == 1) return () => _goToPage(0);
     return () => _goToPage(_currentPage - 1);
   }
 
-  VoidCallback _onNextPage(int plankCount) {
+  VoidCallback _onNextPage(int exerciseCount) {
     if (_currentPage == 0) return () => _goToPage(1);
-    if (_currentPage >= plankCount) return () => _goToPage(1);
+    if (_currentPage >= exerciseCount) return () => _goToPage(1);
     return () => _goToPage(_currentPage + 1);
   }
 
@@ -66,8 +68,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     if (!mounted) return;
-    // 結果画面は pushReplacement 経由のため result は null になり得る。
-    // ホームに戻ったタイミングで常に最新の進捗を読み直す。
+    _invalidateHomeData();
+  }
+
+  Future<void> _startPlankSet(int targetSeconds) async {
+    final plankSet = ref.read(plankSetDefinitionProvider);
+    final plankTypes = await ref.read(plankSetPlankTypesProvider.future);
+
+    if (plankTypes.length != plankSet.plankTypeIds.length) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("プランクセットの種目を読み込めませんでした")),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => PlankSetSessionScreen(
+          plankSet: plankSet,
+          plankTypes: plankTypes,
+          targetSeconds: targetSeconds,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    _invalidateHomeData();
+  }
+
+  void _invalidateHomeData() {
     ref.invalidate(userProgressProvider);
     ref.invalidate(streakStateProvider);
     ref.invalidate(milestoneAchievementsProvider);
@@ -79,6 +111,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final plankTypesAsync = ref.watch(plankTypesProvider);
     final progressAsync = ref.watch(userProgressProvider);
     final streakAsync = ref.watch(streakStateProvider);
+    final plankSet = ref.watch(plankSetDefinitionProvider);
+    final plankSetTypesAsync = ref.watch(plankSetPlankTypesProvider);
 
     return SafeArea(
       child: Column(
@@ -94,6 +128,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return const Center(child: Text("種目がありません"));
                 }
 
+                final plankSetTypes = plankSetTypesAsync.valueOrNull ?? const [];
+
+                final exerciseCount = plankTypes.length + 1;
                 final selectedIndex = ref.watch(selectedPlankIndexProvider);
                 final clampedIndex =
                     selectedIndex.clamp(0, plankTypes.length - 1);
@@ -107,112 +144,132 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final targetSeconds = ref.watch(targetSecondsProvider) ??
                     plankTypes[clampedIndex].defaultSeconds;
                 final isExercisePage = _currentPage > 0;
-                final activePlankIndex =
-                    isExercisePage ? _currentPage - 1 : clampedIndex;
-                final activePlank = plankTypes[activePlankIndex];
+                final isPlankSetPage = _currentPage == exerciseCount;
+                final activePlankIndex = isPlankSetPage
+                    ? plankTypes.length
+                    : (isExercisePage ? _currentPage - 1 : clampedIndex);
+                final activePlank = isPlankSetPage
+                    ? null
+                    : plankTypes[activePlankIndex.clamp(0, plankTypes.length - 1)];
 
                 return Stack(
-                    children: [
-                      Row(
-                        children: [
-                          HomeNavArrowButton(
-                            icon: Icons.chevron_left,
-                            onPressed: _onPreviousPage(plankTypes.length),
-                          ),
-                          Expanded(
-                            child: PageView(
-                              controller: _pageController,
-                              physics: const ClampingScrollPhysics(),
-                              onPageChanged: (page) =>
-                                  _onPageChanged(page, plankTypes),
-                              children: [
-                                CharacterPanel(
-                                  progressAsync: progressAsync,
-                                  streakAsync: streakAsync,
+                  children: [
+                    Row(
+                      children: [
+                        HomeNavArrowButton(
+                          icon: Icons.chevron_left,
+                          onPressed: _onPreviousPage(exerciseCount),
+                        ),
+                        Expanded(
+                          child: PageView(
+                            controller: _pageController,
+                            physics: const ClampingScrollPhysics(),
+                            onPageChanged: (page) =>
+                                _onPageChanged(page, plankTypes),
+                            children: [
+                              CharacterPanel(
+                                progressAsync: progressAsync,
+                                streakAsync: streakAsync,
+                              ),
+                              for (var i = 0; i < plankTypes.length; i++)
+                                PlankDetailPanel(
+                                  plank: plankTypes[i],
+                                  targetSeconds: targetSeconds,
+                                  onTargetSecondsChanged: (seconds) {
+                                    ref
+                                        .read(targetSecondsProvider.notifier)
+                                        .state = seconds;
+                                  },
                                 ),
-                                for (var i = 0; i < plankTypes.length; i++)
-                                  PlankDetailPanel(
-                                    plank: plankTypes[i],
-                                    targetSeconds: targetSeconds,
-                                    onTargetSecondsChanged: (seconds) {
-                                      ref
-                                          .read(targetSecondsProvider.notifier)
-                                          .state = seconds;
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
-                          HomeNavArrowButton(
-                            icon: Icons.chevron_right,
-                            onPressed: _onNextPage(plankTypes.length),
-                          ),
-                        ],
-                      ),
-                      if (isExercisePage) ...[
-                        Positioned(
-                          top: 4,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Text(
-                              "種目を選ぶ",
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
+                              PlankSetDetailPanel(
+                                setName: plankSet.name,
+                                plankTypes: plankSetTypes,
+                                targetSeconds: targetSeconds,
+                                onTargetSecondsChanged: (seconds) {
+                                  ref
+                                      .read(targetSecondsProvider.notifier)
+                                      .state = seconds;
+                                },
+                              ),
+                            ],
                           ),
                         ),
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: ColoredBox(
-                            color: Theme.of(context)
-                                .scaffoldBackgroundColor
-                                .withValues(alpha: 0.96),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const SizedBox(height: 8),
-                                CarouselIndicator(
-                                  count: plankTypes.length,
-                                  selectedIndex: activePlankIndex,
-                                  onDotTap: (index) => _goToPage(index + 1),
+                        HomeNavArrowButton(
+                          icon: Icons.chevron_right,
+                          onPressed: _onNextPage(exerciseCount),
+                        ),
+                      ],
+                    ),
+                    if (isExercisePage) ...[
+                      Positioned(
+                        top: 4,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            "種目を選ぶ",
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: ColoredBox(
+                          color: Theme.of(context)
+                              .scaffoldBackgroundColor
+                              .withValues(alpha: 0.96),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 8),
+                              CarouselIndicator(
+                                count: exerciseCount,
+                                selectedIndex: activePlankIndex,
+                                onDotTap: (index) => _goToPage(index + 1),
+                              ),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
                                 ),
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 52,
-                                    child: FilledButton.icon(
-                                      onPressed: () => _startPlank(
-                                        activePlank,
-                                        targetSeconds,
-                                      ),
-                                      icon: const Icon(Icons.play_arrow, size: 24),
-                                      label: const Text(
-                                        "スタート",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: FilledButton.icon(
+                                    onPressed: () {
+                                      if (isPlankSetPage) {
+                                        _startPlankSet(targetSeconds);
+                                      } else if (activePlank != null) {
+                                        _startPlank(
+                                          activePlank,
+                                          targetSeconds,
+                                        );
+                                      }
+                                    },
+                                    icon: const Icon(Icons.play_arrow, size: 24),
+                                    label: const Text(
+                                      "スタート",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ],
+                  ],
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),

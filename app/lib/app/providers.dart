@@ -1,7 +1,9 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../domain/models/game_constants.dart";
+import "../domain/models/plank_set.dart";
 import "../domain/models/plank_type.dart";
+import "../infrastructure/master/plank_set_defaults.dart";
 import "../domain/models/streak_state.dart";
 import "../domain/models/user_progress.dart";
 import "../domain/repositories/game_constants_repository.dart";
@@ -143,6 +145,23 @@ final characterDialogueSelectorProvider =
 final plankTypesProvider = FutureProvider<List<PlankType>>((ref) async {
   final repo = ref.watch(plankTypeRepositoryProvider);
   return repo.getAll(betaMode: betaMode);
+});
+
+final plankSetDefinitionProvider = Provider<PlankSetDefinition>(
+  (ref) => PlankSetDefaults.set01,
+);
+
+final plankSetPlankTypesProvider = FutureProvider<List<PlankType>>((ref) async {
+  final plankSet = ref.watch(plankSetDefinitionProvider);
+  final repo = ref.watch(plankTypeRepositoryProvider);
+  final types = <PlankType>[];
+  for (final id in plankSet.plankTypeIds) {
+    final plankType = await repo.getById(id);
+    if (plankType != null) {
+      types.add(plankType);
+    }
+  }
+  return types;
 });
 
 final userProgressProvider = FutureProvider<UserProgress>((ref) async {
