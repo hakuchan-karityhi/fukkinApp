@@ -71,43 +71,75 @@ class _CustomPlankTypeEditorScreenState
     return null;
   }
 
+  Future<void> _showValidationAlert(String message) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(message),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _save() async {
-    final error = _validateName(_nameController.text);
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      await _showValidationAlert("種目名を入力してください");
       return;
     }
 
-    final customRepo = ref.read(customPlankTypeRepositoryProvider);
-    final isNew = _existing == null;
-
-    if (isNew) {
-      final count = await customRepo.count();
-      if (count >= CustomPlankType.maxCount) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("カスタム種目は最大${CustomPlankType.maxCount}件までです"),
-          ),
-        );
-        return;
-      }
+    final error = _validateName(_nameController.text);
+    if (error != null) {
+      await _showValidationAlert(error);
+      return;
     }
 
     setState(() => _saving = true);
 
-    final type = CustomPlankType(
-      id: _existing?.id ?? generateCustomPlankTypeId(),
-      name: _nameController.text.trim(),
-      createdAt: _existing?.createdAt ?? DateTime.now(),
-    );
+    try {
+      final customRepo = ref.read(customPlankTypeRepositoryProvider);
+      final isNew = _existing == null;
 
-    await customRepo.save(type);
-    ref.invalidate(customPlankTypesProvider);
-    ref.invalidate(plankTypesProvider);
+      if (isNew) {
+        final count = await customRepo.count();
+        if (count >= CustomPlankType.maxCount) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("カスタム種目は最大${CustomPlankType.maxCount}件までです"),
+            ),
+          );
+          return;
+        }
+      }
 
-    if (!mounted) return;
-    Navigator.of(context).pop(true);
+      final type = CustomPlankType(
+        id: _existing?.id ?? generateCustomPlankTypeId(),
+        name: _nameController.text.trim(),
+        createdAt: _existing?.createdAt ?? DateTime.now(),
+      );
+
+      await customRepo.save(type);
+      ref.invalidate(customPlankTypesProvider);
+      ref.invalidate(plankTypesProvider);
+
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("保存に失敗しました。アプリを再起動してお試しください")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
+    }
   }
 
   Future<void> _delete() async {

@@ -26,31 +26,32 @@ class PlankDetailPanel extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           PlankPoseView(plankType: plank, size: 180, showLabel: false),
-          const SizedBox(height: 4),
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 12,
-            runSpacing: 8,
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                plank.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
+              Flexible(
+                child: Text(
+                  plank.name,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ),
               if (onEdit != null)
                 IconButton(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined),
                   tooltip: "種目を編集",
+                  visualDensity: VisualDensity.compact,
                 ),
-              TargetSecondsStepper(
-                seconds: targetSeconds,
-                onChanged: onTargetSecondsChanged,
-              ),
             ],
+          ),
+          const SizedBox(height: 12),
+          TargetSecondsStepper(
+            seconds: targetSeconds,
+            onChanged: onTargetSecondsChanged,
           ),
           const SizedBox(height: 4),
           Center(child: _DifficultyStars(difficulty: plank.difficulty)),
