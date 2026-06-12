@@ -7,6 +7,7 @@ import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../widgets/dialogue_bubble.dart";
 import "../widgets/plank_pose_view.dart";
+import "plank_session_header.dart";
 import "plank_session_phase.dart";
 
 class PlankExerciseTimer extends ConsumerStatefulWidget {
@@ -15,12 +16,14 @@ class PlankExerciseTimer extends ConsumerStatefulWidget {
     required this.plankType,
     required this.targetSeconds,
     required this.onTimerComplete,
+    this.setName,
     this.progressLabel,
     this.onExitConfirmed,
   });
 
   final PlankType plankType;
   final int targetSeconds;
+  final String? setName;
   final String? progressLabel;
   final Future<void> Function() onTimerComplete;
   final VoidCallback? onExitConfirmed;
@@ -200,15 +203,12 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (widget.progressLabel != null) ...[
-          Text(
-            widget.progressLabel!,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 8),
-        ],
+        PlankSessionHeader(
+          plankName: widget.plankType.name,
+          setName: widget.setName,
+          progressLabel: widget.progressLabel,
+        ),
+        const SizedBox(height: 12),
         PlankPoseView(
           plankType: widget.plankType,
           size: 200,
