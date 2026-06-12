@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -163,6 +164,17 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
     }
   }
 
+  void _debugComplete() {
+    if (!kDebugMode || _phase == PlankSessionPhase.completing) return;
+
+    _timer?.cancel();
+    setState(() {
+      _remainingSeconds = 0;
+      _phase = PlankSessionPhase.completing;
+    });
+    unawaited(_handleTimerComplete());
+  }
+
   Future<void> _handleTimerComplete() async {
     try {
       await widget.onTimerComplete();
@@ -231,6 +243,13 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
         Text(_phase == PlankSessionPhase.preparing ? "" : "秒"),
         const SizedBox(height: 24),
         _buildActionButtons(),
+        if (kDebugMode && _phase != PlankSessionPhase.completing) ...[
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: _debugComplete,
+            child: const Text("DEBUG: 完了"),
+          ),
+        ],
       ],
     );
   }
