@@ -10,11 +10,13 @@ class PlankDetailPanel extends StatelessWidget {
     required this.plank,
     required this.targetSeconds,
     required this.onTargetSecondsChanged,
+    this.onEdit,
   });
 
   final PlankType plank;
   final int targetSeconds;
   final ValueChanged<int> onTargetSecondsChanged;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +40,12 @@ class PlankDetailPanel extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center,
               ),
+              if (onEdit != null)
+                IconButton(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: "種目を編集",
+                ),
               TargetSecondsStepper(
                 seconds: targetSeconds,
                 onChanged: onTargetSecondsChanged,

@@ -60,6 +60,15 @@ class MilestoneAchievementEntries extends Table {
   Set<Column<Object>> get primaryKey => {days};
 }
 
+class CustomPlankTypeEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     UserProgressEntries,
@@ -67,6 +76,7 @@ class MilestoneAchievementEntries extends Table {
     WorkoutRecordEntries,
     MilestoneTargetEntries,
     MilestoneAchievementEntries,
+    CustomPlankTypeEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -75,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -86,6 +96,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(milestoneTargetEntries);
             await m.createTable(milestoneAchievementEntries);
+          }
+          if (from < 3) {
+            await m.createTable(customPlankTypeEntries);
           }
         },
       );
