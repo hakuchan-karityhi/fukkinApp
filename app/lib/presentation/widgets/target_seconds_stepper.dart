@@ -99,6 +99,8 @@ class _StepperButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,
+          minimumSize: Size(size, size),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           foregroundColor: enabled
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).disabledColor,

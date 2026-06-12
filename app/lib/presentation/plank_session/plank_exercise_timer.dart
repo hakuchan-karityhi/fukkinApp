@@ -6,6 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
+import "../../app/action_button_styles.dart";
 import "../widgets/dialogue_bubble.dart";
 import "../widgets/plank_pose_view.dart";
 import "plank_session_phase.dart";
@@ -276,22 +277,26 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
       case PlankSessionPhase.preparing:
         return const SizedBox.shrink();
       case PlankSessionPhase.running:
-        return OutlinedButton(
+        return actionOutlinedButton(
+          width: double.infinity,
           onPressed: _pause,
           child: const Text("一時停止"),
         );
       case PlankSessionPhase.paused:
         return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FilledButton(
-              onPressed: _resume,
-              child: const Text("再開"),
+            Expanded(
+              child: actionFilledButton(
+                onPressed: _resume,
+                child: const Text("再開"),
+              ),
             ),
             const SizedBox(width: 12),
-            OutlinedButton(
-              onPressed: _confirmExit,
-              child: const Text("終了"),
+            Expanded(
+              child: actionOutlinedButton(
+                onPressed: _confirmExit,
+                child: const Text("終了"),
+              ),
             ),
           ],
         );

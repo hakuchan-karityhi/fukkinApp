@@ -123,7 +123,11 @@ class HomeNavArrowButton extends StatelessWidget {
       height: 48,
       child: OutlinedButton(
         onPressed: onPressed,
-        style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(48, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: Icon(icon),
       ),
     );

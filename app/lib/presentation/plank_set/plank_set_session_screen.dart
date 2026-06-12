@@ -6,6 +6,7 @@ import "../../domain/models/milestone.dart";
 import "../../domain/models/plank_result.dart";
 import "../../domain/models/plank_set.dart";
 import "../../domain/models/plank_type.dart";
+import "../../app/action_button_styles.dart";
 import "../plank_session/plank_exercise_timer.dart";
 import "../widgets/plank_pose_view.dart";
 import "plank_set_result_screen.dart";
@@ -240,13 +241,15 @@ class _PlankCompletedPanel extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           if (showNextButton) ...[
-            FilledButton(
+            actionFilledButton(
+              width: double.infinity,
               onPressed: onNext,
               child: const Text("次の種目へ"),
             ),
             const SizedBox(height: 12),
           ],
-          OutlinedButton(
+          actionOutlinedButton(
+            width: double.infinity,
             onPressed: onFinish,
             child: const Text("終了"),
           ),

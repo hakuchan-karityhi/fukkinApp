@@ -5,6 +5,7 @@ import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_session_screen.dart";
 import "../plank_set/plank_set_session_screen.dart";
+import "../../app/action_button_styles.dart";
 import "../widgets/target_seconds_stepper.dart";
 import "widgets/character_panel.dart";
 import "widgets/exercise_panel.dart";
@@ -258,7 +259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 child: SizedBox(
                                   width: double.infinity,
-                                  height: 52,
+                                  height: kActionButtonHeight,
                                   child: FilledButton.icon(
                                     onPressed: () {
                                       if (isPlankSetPage) {
@@ -270,14 +271,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         );
                                       }
                                     },
-                                    icon: const Icon(Icons.play_arrow, size: 24),
-                                    label: const Text(
-                                      "スタート",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    icon: const Icon(Icons.play_arrow, size: 28),
+                                    label: const Text("スタート"),
                                   ),
                                 ),
                               ),

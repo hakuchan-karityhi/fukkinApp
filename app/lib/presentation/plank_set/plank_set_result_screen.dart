@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+
+import "../../app/action_button_styles.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../app/providers.dart";
@@ -87,21 +89,12 @@ class PlankSetResultScreen extends ConsumerWidget {
                 ),
               ),
             const Spacer(),
-            SizedBox(
+            actionFilledButton(
               width: double.infinity,
-              height: 56,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text(
-                  "ホームへ",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text("ホームへ"),
             ),
           ],
         ),
