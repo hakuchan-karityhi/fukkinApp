@@ -9,24 +9,35 @@ class PlankSetDetailPanel extends StatelessWidget {
     required this.setName,
     required this.plankTypes,
     required this.targetSeconds,
-    required this.onTargetSecondsChanged,
   });
 
   final String setName;
   final List<PlankType> plankTypes;
   final int targetSeconds;
-  final ValueChanged<int> onTargetSecondsChanged;
 
-  static const _minSeconds = 10;
-  static const _maxSeconds = 120;
+  PlankType? get _basicPlank {
+    for (final plank in plankTypes) {
+      if (plank.id == "PK-01") return plank;
+    }
+    return plankTypes.isEmpty ? null : plankTypes.first;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final basicPlank = _basicPlank;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 108),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (basicPlank != null)
+            PlankPoseView(
+              plankType: basicPlank,
+              size: 180,
+              showLabel: false,
+            ),
+          const SizedBox(height: 16),
           Text(
             setName,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -34,105 +45,18 @@ class PlankSetDetailPanel extends StatelessWidget {
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          Text(
-            "3種連続実行",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          _PlankSequencePreview(plankTypes: plankTypes),
-          const SizedBox(height: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "目標秒数（共通）",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    "$targetSeconds秒",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 10,
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 16,
-                  ),
-                  overlayShape: const RoundSliderOverlayShape(
-                    overlayRadius: 24,
-                  ),
-                ),
-                child: Slider(
-                  value: targetSeconds.toDouble(),
-                  min: _minSeconds.toDouble(),
-                  max: _maxSeconds.toDouble(),
-                  divisions: _maxSeconds - _minSeconds,
-                  label: "$targetSeconds秒",
-                  onChanged: (value) =>
-                      onTargetSecondsChanged(value.round()),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlankSequencePreview extends StatelessWidget {
-  const _PlankSequencePreview({required this.plankTypes});
-
-  final List<PlankType> plankTypes;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var i = 0; i < plankTypes.length; i++) ...[
-          if (i > 0)
+          const SizedBox(height: 12),
+          for (final plank in plankTypes)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Icon(
-                Icons.arrow_forward,
-                size: 18,
-                color: Theme.of(context).colorScheme.outline,
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                "${plank.name}$targetSeconds秒",
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
               ),
             ),
-          Column(
-            children: [
-              PlankPoseView(
-                plankType: plankTypes[i],
-                size: 72,
-                showLabel: false,
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  plankTypes[i].name,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
         ],
-      ],
+      ),
     );
   }
 }

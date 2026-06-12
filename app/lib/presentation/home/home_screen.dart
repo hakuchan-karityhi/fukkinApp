@@ -185,11 +185,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 setName: plankSet.name,
                                 plankTypes: plankSetTypes,
                                 targetSeconds: targetSeconds,
-                                onTargetSecondsChanged: (seconds) {
-                                  ref
-                                      .read(targetSecondsProvider.notifier)
-                                      .state = seconds;
-                                },
                               ),
                             ],
                           ),

@@ -5,7 +5,7 @@ class PlankSetDefaults {
 
   static const set01 = PlankSetDefinition(
     id: "SET-01",
-    name: "プランクセット",
+    name: "プランクセット１",
     plankTypeIds: ["PK-01", "PK-02", "PK-03"],
   );
 
