@@ -1,0 +1,122 @@
+{
+  "plankTypes": [
+    {
+      "id": "PK-01",
+      "name": "ベーシックプランク",
+      "difficulty": 1,
+      "expMultiplier": 1.0,
+      "defaultSeconds": 30,
+      "enabledInMvp": true,
+      "enabledInBeta": true,
+      "poseAssetId": "basic_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 30,
+      "recommendedSecondsMax": 60
+    },
+    {
+      "id": "PK-02",
+      "name": "ニープランク",
+      "difficulty": 1,
+      "expMultiplier": 0.9,
+      "defaultSeconds": 30,
+      "enabledInMvp": true,
+      "enabledInBeta": true,
+      "poseAssetId": "knee_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 30,
+      "recommendedSecondsMax": 60
+    },
+    {
+      "id": "PK-03",
+      "name": "ハイプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.2,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "high_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 45
+    },
+    {
+      "id": "PK-04",
+      "name": "リバースプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.1,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "reverse_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-05",
+      "name": "サイドプランク",
+      "difficulty": 2,
+      "expMultiplier": 1.3,
+      "defaultSeconds": 20,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "side_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 15,
+      "recommendedSecondsMax": 30,
+      "isPerSide": true
+    },
+    {
+      "id": "PK-06",
+      "name": "プランクジャック",
+      "difficulty": 2,
+      "expMultiplier": 1.2,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "plank_jack",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-07",
+      "name": "スパイダープランク",
+      "difficulty": 3,
+      "expMultiplier": 1.3,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "spider_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-08",
+      "name": "レッグリフトプランク",
+      "difficulty": 3,
+      "expMultiplier": 1.4,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "leg_lift_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    },
+    {
+      "id": "PK-09",
+      "name": "ショルダータッププランク",
+      "difficulty": 3,
+      "expMultiplier": 1.5,
+      "defaultSeconds": 30,
+      "enabledInMvp": false,
+      "enabledInBeta": true,
+      "poseAssetId": "shoulder_tap_plank",
+      "formImageAsset": "assets/character/kangaru2.png",
+      "recommendedSecondsMin": 20,
+      "recommendedSecondsMax": 40
+    }
+  ]
+}

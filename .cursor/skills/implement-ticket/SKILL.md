@@ -14,7 +14,7 @@ description: >-
 
 ## 前提スキル・ルール
 
-- ブランチ作成: [create-branch/SKILL.md](../create-branch/SKILL.md) — **必ず** `scripts/git/new-branch.sh` を使う
+- ブランチ作成: [create-branch/SKILL.md](../create-branch/SKILL.md) — チケット番号が分かるときは `scripts/git/start-ticket.sh` を優先（worktree 自動判定）。それ以外は `scripts/git/new-branch.sh`
 - ブランチポリシー: `.cursor/rules/branch-policy.mdc`
 - 設計参照: `01-design/02-youken.md`, `01-design/04-basic-design.md`
 - PR 作成: `gh pr create`（ユーザールールの PR 手順に従う）
@@ -68,30 +68,34 @@ git log origin/develop --oneline -20
 
 ### Step 1: ブランチ作成
 
-1. [create-branch](../create-branch/SKILL.md) の手順でブランチ名を決める
-2. チケット番号からサフィックスを組み立てる:
-
-```
-チケット: [BETA-002] プランク種目拡張 Phase1
-  → feature/002-plank-types-phase1
-```
-
-3. ユーザーに以下を提示し承認を得る:
+1. チケットファイル名からブランチ名を決める（例: `009-records-day-detail.md` → `feature/009-records-day-detail`）
+2. ユーザーに以下を提示し承認を得る:
 
 ```
 種類:     feature
-ブランチ: feature/002-plank-types-phase1
+ブランチ: feature/009-records-day-detail
 分岐元:   develop
+モード:   checkout（develop 上）/ worktree（既に別 feature 上）
 ```
 
-4. 実行:
+3. **チケット番号が分かる場合**（推奨）— `start-ticket.sh` で自動セットアップ:
 
 ```bash
 git fetch origin
+# 例: MVP-009 → develop 上なら checkout、既に feature 中なら worktree
+scripts/git/start-ticket.sh 009
+# フェーズ明示: scripts/git/start-ticket.sh mvp/009
+# worktree 強制:  scripts/git/start-ticket.sh 011 --worktree
+```
+
+4. チケット番号が不明・fix/docs など **feature 以外** のときのみ `new-branch.sh`:
+
+```bash
 scripts/git/new-branch.sh feature 002-plank-types-phase1 develop
 ```
 
-`develop` が無い場合は先に作成・fetch するようユーザーに伝える。
+`develop` が無い場合は先に作成・fetch するようユーザーに伝える。  
+worktree が作られた場合は、**そのパスを完了報告に記載**し、実装は worktree 側で行う。
 
 ### Step 2: 実装
 

@@ -82,6 +82,24 @@ scripts/git/new-branch.sh docs update-basic-design develop
 
 分岐元を省略すると、種類ごとの既定値が使われる。
 
+### チケット番号から並行作業を始める（worktree）
+
+チケットファイル名からブランチ名を自動解決し、状況に応じて checkout または worktree を用意する:
+
+```bash
+# develop 上 → メイン checkout で feature/009-... を作成
+scripts/git/start-ticket.sh 009
+
+# 既に別 feature 上 → ../fukkin-011 に worktree を追加
+scripts/git/start-ticket.sh 011
+
+# 明示指定
+scripts/git/start-ticket.sh mvp/011 --worktree
+scripts/git/start-ticket.sh beta/009 --checkout
+```
+
+2ウィンドウ並行の例: 先に `009`、続けて `011`（自動で worktree になる）。
+
 ### Step 7: 作成後
 
 - `git branch --show-current` で確認

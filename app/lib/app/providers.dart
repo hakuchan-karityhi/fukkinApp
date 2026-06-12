@@ -1,0 +1,217 @@
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "../domain/models/game_constants.dart";
+import "../domain/models/plank_set.dart";
+import "../domain/models/workout_record.dart";
+import "../domain/models/plank_type.dart";
+import "../infrastructure/master/plank_set_defaults.dart";
+import "../domain/models/streak_state.dart";
+import "../domain/models/user_progress.dart";
+import "../domain/repositories/game_constants_repository.dart";
+import "../domain/repositories/plank_type_repository.dart";
+import "../domain/repositories/streak_repository.dart";
+import "../domain/repositories/user_progress_repository.dart";
+import "../domain/repositories/workout_repository.dart";
+import "../domain/repositories/milestone_repository.dart";
+import "../domain/models/milestone.dart";
+import "../domain/services/milestone_service.dart";
+import "../infrastructure/local/milestone_repository.dart";
+import "../domain/repositories/character_dialogue_repository.dart";
+import "../domain/models/character_dialogues.dart";
+import "../domain/services/character_dialogue_selector.dart";
+import "../domain/services/exp_calculator.dart";
+import "../domain/services/level_service.dart";
+import "../domain/services/penalty_service.dart";
+import "../domain/services/streak_service.dart";
+import "../application/complete_plank_usecase.dart";
+import "../application/reset_progress_usecase.dart";
+import "../infrastructure/local/app_database.dart";
+import "../infrastructure/local/streak_repository.dart";
+import "../infrastructure/local/user_progress_repository.dart";
+import "../infrastructure/local/workout_repository.dart";
+import "../infrastructure/master/plank_type_repository.dart";
+import "../infrastructure/master/character_dialogue_repository.dart";
+import "../infrastructure/remote_config/remote_config_game_constants_repository.dart";
+
+const betaMode = true;
+
+class TodayWorkoutSummary {
+  const TodayWorkoutSummary({
+    required this.sessionCount,
+    required this.earnedExpToday,
+  });
+
+  final int sessionCount;
+  final int earnedExpToday;
+}
+
+final workoutRecordsByDateProvider =
+    FutureProvider.family<List<WorkoutRecord>, DateTime>((ref, date) async {
+  final normalized = DateTime(date.year, date.month, date.day);
+  return ref.watch(workoutRepositoryProvider).getByDate(normalized);
+});
+
+final todayWorkoutSummaryProvider =
+    FutureProvider<TodayWorkoutSummary>((ref) async {
+  final repo = ref.watch(workoutRepositoryProvider);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final records = await repo.getByDate(today);
+  return TodayWorkoutSummary(
+    sessionCount: records.length,
+    earnedExpToday: records.fold(0, (sum, record) => sum + record.earnedExp),
+  );
+});
+
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
+  return db;
+});
+
+final gameConstantsRepositoryProvider = Provider<GameConstantsRepository>(
+  (ref) => RemoteConfigGameConstantsRepository(
+    fetchOverrides: () async => const {},
+  ),
+);
+
+final gameConstantsProvider = FutureProvider<GameConstants>((ref) async {
+  final repo = ref.watch(gameConstantsRepositoryProvider);
+  return repo.load();
+});
+
+final expCalculatorProvider = Provider<ExpCalculator?>((ref) {
+  final constants = ref.watch(gameConstantsProvider).valueOrNull;
+  return constants == null ? null : ExpCalculator(constants);
+});
+
+final streakServiceProvider = Provider<StreakService?>((ref) {
+  final constants = ref.watch(gameConstantsProvider).valueOrNull;
+  return constants == null ? null : StreakService(constants);
+});
+
+final levelServiceProvider = Provider<LevelService?>((ref) {
+  final constants = ref.watch(gameConstantsProvider).valueOrNull;
+  return constants == null ? null : LevelService(constants);
+});
+
+final penaltyServiceProvider = Provider<PenaltyService?>((ref) {
+  final constants = ref.watch(gameConstantsProvider).valueOrNull;
+  final level = ref.watch(levelServiceProvider);
+  if (constants == null || level == null) return null;
+  return PenaltyService(constants, level);
+});
+
+final plankTypeRepositoryProvider = Provider<PlankTypeRepository>(
+  (ref) => AssetPlankTypeRepository(),
+);
+
+final userProgressRepositoryProvider = Provider<UserProgressRepository>((ref) {
+  return DriftUserProgressRepository(ref.watch(appDatabaseProvider));
+});
+
+final streakRepositoryProvider = Provider<StreakRepository>((ref) {
+  return DriftStreakRepository(ref.watch(appDatabaseProvider));
+});
+
+final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
+  return DriftWorkoutRepository(ref.watch(appDatabaseProvider));
+});
+
+final milestoneRepositoryProvider = Provider<MilestoneRepository>((ref) {
+  return DriftMilestoneRepository(ref.watch(appDatabaseProvider));
+});
+
+final milestoneServiceProvider = Provider<MilestoneService>((ref) {
+  return const MilestoneService();
+});
+
+final milestoneTargetsProvider = FutureProvider<List<MilestoneTarget>>((ref) async {
+  return ref.watch(milestoneRepositoryProvider).getTargets();
+});
+
+final milestoneAchievementsProvider =
+    FutureProvider<List<MilestoneAchievement>>((ref) async {
+  return ref.watch(milestoneRepositoryProvider).getAchieved();
+});
+
+final characterDialogueRepositoryProvider =
+    Provider<CharacterDialogueRepository>(
+  (ref) => AssetCharacterDialogueRepository(),
+);
+
+final characterDialoguesProvider = FutureProvider<CharacterDialogues>((ref) async {
+  return ref.watch(characterDialogueRepositoryProvider).load();
+});
+
+final characterDialogueSelectorProvider =
+    Provider<CharacterDialogueSelector>((ref) {
+  return const CharacterDialogueSelector();
+});
+
+final plankTypesProvider = FutureProvider<List<PlankType>>((ref) async {
+  final repo = ref.watch(plankTypeRepositoryProvider);
+  return repo.getAll(betaMode: betaMode);
+});
+
+final plankSetDefinitionProvider = Provider<PlankSetDefinition>(
+  (ref) => PlankSetDefaults.set01,
+);
+
+final plankSetPlankTypesProvider = FutureProvider<List<PlankType>>((ref) async {
+  final plankSet = ref.watch(plankSetDefinitionProvider);
+  final repo = ref.watch(plankTypeRepositoryProvider);
+  final types = <PlankType>[];
+  for (final id in plankSet.plankTypeIds) {
+    final plankType = await repo.getById(id);
+    if (plankType != null) {
+      types.add(plankType);
+    }
+  }
+  return types;
+});
+
+final userProgressProvider = FutureProvider<UserProgress>((ref) async {
+  return ref.watch(userProgressRepositoryProvider).get();
+});
+
+final streakStateProvider = FutureProvider<StreakState>((ref) async {
+  return ref.watch(streakRepositoryProvider).get();
+});
+
+final completePlankUseCaseProvider = Provider<CompletePlankUseCase?>((ref) {
+  final expCalculator = ref.watch(expCalculatorProvider);
+  final streakService = ref.watch(streakServiceProvider);
+  final levelService = ref.watch(levelServiceProvider);
+  if (expCalculator == null || streakService == null || levelService == null) {
+    return null;
+  }
+
+  return CompletePlankUseCase(
+    plankTypeRepository: ref.watch(plankTypeRepositoryProvider),
+    userProgressRepository: ref.watch(userProgressRepositoryProvider),
+    streakRepository: ref.watch(streakRepositoryProvider),
+    workoutRepository: ref.watch(workoutRepositoryProvider),
+    milestoneRepository: ref.watch(milestoneRepositoryProvider),
+    expCalculator: expCalculator,
+    streakService: streakService,
+    levelService: levelService,
+    milestoneService: ref.watch(milestoneServiceProvider),
+  );
+});
+
+final resetProgressUseCaseProvider = Provider<ResetProgressUseCase>((ref) {
+  return ResetProgressUseCase(
+    userProgressRepository: ref.watch(userProgressRepositoryProvider),
+    streakRepository: ref.watch(streakRepositoryProvider),
+    workoutRepository: ref.watch(workoutRepositoryProvider),
+    milestoneRepository: ref.watch(milestoneRepositoryProvider),
+  );
+});
+
+final selectedPlankIndexProvider = StateProvider<int>((ref) => 0);
+
+final targetSecondsProvider = StateProvider<int?>((ref) => null);
+
+final plankSetTargetSecondsProvider =
+    StateProvider<Map<String, int>>((ref) => {});
