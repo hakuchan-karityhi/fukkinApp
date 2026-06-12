@@ -1,15 +1,12 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../result/plank_result_screen.dart";
-import "../widgets/dialogue_bubble.dart";
-import "../widgets/plank_pose_view.dart";
+import "plank_exercise_timer.dart";
 
-class PlankSessionScreen extends ConsumerStatefulWidget {
+class PlankSessionScreen extends ConsumerWidget {
   const PlankSessionScreen({
     super.key,
     required this.plankType,
@@ -20,106 +17,11 @@ class PlankSessionScreen extends ConsumerStatefulWidget {
   final int targetSeconds;
 
   @override
-  ConsumerState<PlankSessionScreen> createState() => _PlankSessionScreenState();
-}
-
-class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
-  late int _remainingSeconds;
-  Timer? _timer;
-  bool _isRunning = false;
-  bool _isCompleting = false;
-  int _cheerRotation = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _remainingSeconds = widget.targetSeconds;
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _toggleTimer() {
-    if (_isRunning) {
-      _timer?.cancel();
-      setState(() => _isRunning = false);
-      return;
-    }
-
-    setState(() => _isRunning = true);
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_remainingSeconds <= 1) {
-        _timer?.cancel();
-        setState(() {
-          _remainingSeconds = 0;
-          _isRunning = false;
-        });
-        return;
-      }
-      setState(() {
-        _remainingSeconds--;
-        if (_remainingSeconds % 12 == 0) {
-          _cheerRotation++;
-        }
-      });
-    });
-  }
-
-  Future<void> _complete() async {
-    if (_isCompleting) return;
-
-    final useCase = ref.read(completePlankUseCaseProvider);
-    if (useCase == null) return;
-
-    setState(() => _isCompleting = true);
-    _timer?.cancel();
-
-    try {
-      final result = await useCase.execute(
-        plankTypeId: widget.plankType.id,
-        targetSeconds: widget.targetSeconds,
-      );
-
-      if (!mounted) return;
-
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => PlankResultScreen(result: result),
-        ),
-      );
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("完了処理に失敗しました: $error")),
-      );
-      setState(() => _isCompleting = false);
-    }
-  }
-
-  String? _buildCheerText() {
-    final dialogues = ref.watch(characterDialoguesProvider).valueOrNull;
-    final streak = ref.watch(streakStateProvider).valueOrNull;
-    if (dialogues == null || streak == null) return null;
-
-    return ref.watch(characterDialogueSelectorProvider).sessionCheer(
-          master: dialogues,
-          currentStreak: streak.currentStreak,
-          now: DateTime.now(),
-          rotationIndex: _cheerRotation,
-        );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cheerText = _buildCheerText();
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.plankType.name,
+          plankType.name,
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -128,46 +30,29 @@ class _PlankSessionScreenState extends ConsumerState<PlankSessionScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            PlankPoseView(
-              plankType: widget.plankType,
-              size: 200,
-              showLabel: false,
-            ),
-            if (cheerText != null) ...[
-              const SizedBox(height: 12),
-              DialogueBubble(text: cheerText),
-            ],
-            const SizedBox(height: 16),
-            Text(
-              "$_remainingSeconds",
-              style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
-            ),
-            const Text("秒"),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                OutlinedButton(
-                  onPressed: _isCompleting ? null : _toggleTimer,
-                  child: Text(_isRunning ? "一時停止" : "開始"),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: _isCompleting ? null : _complete,
-                  child: _isCompleting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text("完了"),
-                ),
-              ],
-            ),
-          ],
+        child: PlankExerciseTimer(
+          plankType: plankType,
+          targetSeconds: targetSeconds,
+          onExitConfirmed: () => Navigator.of(context).pop(),
+          onTimerComplete: () async {
+            final useCase = ref.read(completePlankUseCaseProvider);
+            if (useCase == null) {
+              throw StateError("CompletePlankUseCase is not ready");
+            }
+
+            final result = await useCase.execute(
+              plankTypeId: plankType.id,
+              targetSeconds: targetSeconds,
+            );
+
+            if (!context.mounted) return;
+
+            await Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => PlankResultScreen(result: result),
+              ),
+            );
+          },
         ),
       ),
     );
