@@ -69,6 +69,26 @@ class CustomPlankTypeEntries extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class CustomPlankSetEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class CustomPlankSetItemEntries extends Table {
+  TextColumn get setId =>
+      text().references(CustomPlankSetEntries, #id, onDelete: KeyAction.cascade)();
+  IntColumn get sortOrder => integer()();
+  TextColumn get plankTypeId => text()();
+  IntColumn get targetSeconds => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {setId, sortOrder};
+}
+
 @DriftDatabase(
   tables: [
     UserProgressEntries,
@@ -77,6 +97,8 @@ class CustomPlankTypeEntries extends Table {
     MilestoneTargetEntries,
     MilestoneAchievementEntries,
     CustomPlankTypeEntries,
+    CustomPlankSetEntries,
+    CustomPlankSetItemEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -85,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   static const _createCustomPlankTypeTableSql = """
 CREATE TABLE IF NOT EXISTS custom_plank_type_entries (
@@ -95,11 +117,31 @@ CREATE TABLE IF NOT EXISTS custom_plank_type_entries (
 )
 """;
 
+  static const _createCustomPlankSetTableSql = """
+CREATE TABLE IF NOT EXISTS custom_plank_set_entries (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+)
+""";
+
+  static const _createCustomPlankSetItemTableSql = """
+CREATE TABLE IF NOT EXISTS custom_plank_set_item_entries (
+  set_id TEXT NOT NULL,
+  sort_order INTEGER NOT NULL,
+  plank_type_id TEXT NOT NULL,
+  target_seconds INTEGER NOT NULL,
+  PRIMARY KEY (set_id, sort_order),
+  FOREIGN KEY (set_id) REFERENCES custom_plank_set_entries(id) ON DELETE CASCADE
+)
+""";
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          // v3 時点で user_version のみ進みテーブル未作成、という端末向けの保険
           await customStatement(_createCustomPlankTypeTableSql);
+          await customStatement(_createCustomPlankSetTableSql);
+          await customStatement(_createCustomPlankSetItemTableSql);
         },
         onCreate: (Migrator m) async {
           await m.createAll();
@@ -114,6 +156,10 @@ CREATE TABLE IF NOT EXISTS custom_plank_type_entries (
           }
           if (from < 4) {
             await customStatement(_createCustomPlankTypeTableSql);
+          }
+          if (from < 5) {
+            await m.createTable(customPlankSetEntries);
+            await m.createTable(customPlankSetItemEntries);
           }
         },
       );

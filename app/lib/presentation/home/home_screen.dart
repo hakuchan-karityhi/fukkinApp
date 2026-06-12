@@ -2,14 +2,19 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../app/providers.dart";
+import "../../domain/models/custom_plank_set.dart";
+import "../../domain/models/plank_set.dart";
 import "../../domain/models/plank_type.dart";
 import "../../domain/services/custom_plank_type_mapper.dart";
+import "../custom_plank_set/custom_plank_set_editor_screen.dart";
 import "../custom_plank_type/custom_plank_type_editor_screen.dart";
 import "../plank_session/plank_session_screen.dart";
 import "../plank_set/plank_set_session_screen.dart";
 import "../widgets/target_seconds_stepper.dart";
+import "widgets/add_custom_plank_set_panel.dart";
 import "widgets/add_custom_plank_type_panel.dart";
 import "widgets/character_panel.dart";
+import "widgets/custom_plank_set_carousel_panel.dart";
 import "widgets/exercise_panel.dart";
 import "widgets/home_header.dart";
 import "widgets/plank_set_panel.dart";
@@ -50,15 +55,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  VoidCallback? _onPreviousPage(int exerciseCount) {
+  int _exercisePageCount(int plankCount, int customSetCount) =>
+      plankCount + customSetCount + 3;
+
+  int _addPlankPageIndex(int plankCount) => plankCount + 1;
+
+  int _officialSetPageIndex(int plankCount) => plankCount + 2;
+
+  int _addSetPageIndex(int plankCount, int customSetCount) =>
+      plankCount + 3 + customSetCount;
+
+  int _activeCarouselIndex({
+    required int page,
+    required int plankCount,
+    required int customSetCount,
+  }) {
+    if (page <= plankCount) return page - 1;
+    if (page == _addPlankPageIndex(plankCount)) return plankCount;
+    if (page == _officialSetPageIndex(plankCount)) return plankCount + 1;
+    if (page < _addSetPageIndex(plankCount, customSetCount)) {
+      return plankCount + 2 + (page - plankCount - 3);
+    }
+    return plankCount + 2 + customSetCount;
+  }
+
+  VoidCallback? _onPreviousPage(int exercisePageCount) {
     if (_currentPage == 0) return null;
     if (_currentPage == 1) return () => _goToPage(0);
     return () => _goToPage(_currentPage - 1);
   }
 
-  VoidCallback _onNextPage(int exerciseCount) {
+  VoidCallback _onNextPage(int exercisePageCount) {
     if (_currentPage == 0) return () => _goToPage(1);
-    if (_currentPage >= exerciseCount) return () => _goToPage(1);
+    if (_currentPage >= exercisePageCount) return () => _goToPage(1);
     return () => _goToPage(_currentPage + 1);
   }
 
@@ -76,10 +105,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _invalidateHomeData();
   }
 
-  Future<void> _startPlankSet(List<PlankType> plankTypes) async {
-    final plankSet = ref.read(plankSetDefinitionProvider);
-    final secondsByPlankId = ref.read(plankSetTargetSecondsProvider);
-
+  Future<void> _startPlankSet({
+    required PlankSetDefinition plankSet,
+    required List<PlankType> plankTypes,
+    required Map<String, int> secondsByPlankId,
+  }) async {
     if (plankTypes.length != plankSet.plankTypeIds.length) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -131,17 +161,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  int _addPageIndex(int plankCount) => plankCount + 1;
+  Future<void> _openCustomPlankSetEditor({String? existingSetId}) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CustomPlankSetEditorScreen(existingSetId: existingSetId),
+      ),
+    );
 
-  int _setPageIndex(int plankCount) => plankCount + 2;
+    if (saved == true && mounted) {
+      ref.invalidate(customPlankSetsProvider);
+    }
+  }
+
+  void _updateCustomSetSeconds(String setId, String plankId, int seconds) {
+    final current = ref.read(customPlankSetTargetSecondsProvider);
+    final setSeconds = Map<String, int>.from(current[setId] ?? {});
+    setSeconds[plankId] = TargetSeconds.clamp(seconds);
+    ref.read(customPlankSetTargetSecondsProvider.notifier).state = {
+      ...current,
+      setId: setSeconds,
+    };
+  }
+
+  Map<String, int> _secondsForCustomSet(CustomPlankSet set) {
+    final overrides = ref.read(customPlankSetTargetSecondsProvider)[set.id] ?? {};
+    return {
+      for (final item in set.items)
+        item.plankTypeId: TargetSeconds.clamp(
+          overrides[item.plankTypeId] ?? item.targetSeconds,
+        ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     final plankTypesAsync = ref.watch(plankTypesProvider);
     final progressAsync = ref.watch(userProgressProvider);
     final streakAsync = ref.watch(streakStateProvider);
-    final plankSet = ref.watch(plankSetDefinitionProvider);
-    final plankSetTypesAsync = ref.watch(plankSetPlankTypesProvider);
+    final officialSet = ref.watch(plankSetDefinitionProvider);
+    final officialSetTypesAsync = ref.watch(plankSetPlankTypesProvider);
+    final customSetsAsync = ref.watch(customPlankSetsProvider);
 
     return SafeArea(
       child: Column(
@@ -157,12 +216,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return const Center(child: Text("種目がありません"));
                 }
 
-                final plankSetTypes = plankSetTypesAsync.valueOrNull ?? const [];
+                final customSets = customSetsAsync.valueOrNull ?? const [];
+                final officialSetTypes =
+                    officialSetTypesAsync.valueOrNull ?? const [];
 
                 final plankCount = plankTypes.length;
-                final exerciseCount = plankCount + 2;
-                final addPageIndex = _addPageIndex(plankCount);
-                final setPageIndex = _setPageIndex(plankCount);
+                final customSetCount = customSets.length;
+                final exercisePageCount =
+                    _exercisePageCount(plankCount, customSetCount);
+                final addPlankPage = _addPlankPageIndex(plankCount);
+                final officialSetPage = _officialSetPageIndex(plankCount);
+                final addSetPage = _addSetPageIndex(plankCount, customSetCount);
+
                 final selectedIndex = ref.watch(selectedPlankIndexProvider);
                 final clampedIndex = selectedIndex.clamp(0, plankCount - 1);
                 if (selectedIndex != clampedIndex) {
@@ -176,19 +241,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ref.watch(targetSecondsProvider) ??
                       plankTypes[clampedIndex].defaultSeconds,
                 );
-                final plankSetSeconds =
+                final officialSetSeconds =
                     ref.watch(plankSetTargetSecondsProvider);
+
                 final isExercisePage = _currentPage > 0;
-                final isAddPage = _currentPage == addPageIndex;
-                final isPlankSetPage = _currentPage == setPageIndex;
-                final activePlankIndex = isPlankSetPage
-                    ? plankCount + 1
-                    : isAddPage
-                        ? plankCount
-                        : (isExercisePage ? _currentPage - 1 : clampedIndex);
-                final activePlank = isPlankSetPage || isAddPage
+                final isAddPlankPage = _currentPage == addPlankPage;
+                final isOfficialSetPage = _currentPage == officialSetPage;
+                final isAddSetPage = _currentPage == addSetPage;
+                final isCustomSetPage = _currentPage > officialSetPage &&
+                    _currentPage < addSetPage;
+                final customSetIndex =
+                    isCustomSetPage ? _currentPage - officialSetPage - 1 : -1;
+                final activeCustomSet = isCustomSetPage &&
+                        customSetIndex >= 0 &&
+                        customSetIndex < customSets.length
+                    ? customSets[customSetIndex]
+                    : null;
+
+                final activeCarouselIndex = _activeCarouselIndex(
+                  page: _currentPage,
+                  plankCount: plankCount,
+                  customSetCount: customSetCount,
+                );
+
+                final activePlank = isOfficialSetPage ||
+                        isAddPlankPage ||
+                        isAddSetPage ||
+                        isCustomSetPage
                     ? null
-                    : plankTypes[activePlankIndex.clamp(0, plankCount - 1)];
+                    : plankTypes[
+                        activeCarouselIndex.clamp(0, plankCount - 1)];
 
                 return Stack(
                   children: [
@@ -196,7 +278,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         HomeNavArrowButton(
                           icon: Icons.chevron_left,
-                          onPressed: _onPreviousPage(exerciseCount),
+                          onPressed: _onPreviousPage(exercisePageCount),
                         ),
                         Expanded(
                           child: PageView(
@@ -218,9 +300,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         .read(targetSecondsProvider.notifier)
                                         .state = TargetSeconds.clamp(seconds);
                                   },
-                                  onEdit: CustomPlankTypeMapper.isCustomPlankTypeId(
-                                    plankTypes[i].id,
-                                  )
+                                  onEdit: CustomPlankTypeMapper
+                                          .isCustomPlankTypeId(plankTypes[i].id)
                                       ? () => _openCustomPlankEditor(
                                             existingId: plankTypes[i].id,
                                           )
@@ -230,26 +311,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 onAdd: () => _openCustomPlankEditor(),
                               ),
                               PlankSetDetailPanel(
-                                setName: plankSet.name,
-                                plankTypes: plankSetTypes,
-                                targetSecondsByPlankId: plankSetSeconds,
+                                setName: officialSet.name,
+                                plankTypes: officialSetTypes,
+                                targetSecondsByPlankId: officialSetSeconds,
                                 onTargetSecondsChanged: (plankId, seconds) {
                                   ref
                                       .read(
                                         plankSetTargetSecondsProvider.notifier,
                                       )
                                       .state = {
-                                    ...plankSetSeconds,
+                                    ...officialSetSeconds,
                                     plankId: TargetSeconds.clamp(seconds),
                                   };
                                 },
+                              ),
+                              for (final set in customSets)
+                                CustomPlankSetCarouselPanel(
+                                  set: set,
+                                  onEdit: () => _openCustomPlankSetEditor(
+                                    existingSetId: set.id,
+                                  ),
+                                  onTargetSecondsChanged: (plankId, seconds) {
+                                    _updateCustomSetSeconds(
+                                      set.id,
+                                      plankId,
+                                      seconds,
+                                    );
+                                  },
+                                ),
+                              AddCustomPlankSetPanel(
+                                onAdd: () => _openCustomPlankSetEditor(),
                               ),
                             ],
                           ),
                         ),
                         HomeNavArrowButton(
                           icon: Icons.chevron_right,
-                          onPressed: _onNextPage(exerciseCount),
+                          onPressed: _onNextPage(exercisePageCount),
                         ),
                       ],
                     ),
@@ -282,8 +380,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             children: [
                               const SizedBox(height: 8),
                               CarouselIndicator(
-                                count: exerciseCount,
-                                selectedIndex: activePlankIndex,
+                                count: exercisePageCount,
+                                selectedIndex: activeCarouselIndex,
                                 onDotTap: (index) => _goToPage(index + 1),
                               ),
                               const SizedBox(height: 12),
@@ -295,27 +393,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   width: double.infinity,
                                   height: 52,
                                   child: FilledButton.icon(
-                                    onPressed: () {
-                                      if (isAddPage) {
+                                    onPressed: () async {
+                                      if (isAddPlankPage) {
                                         _openCustomPlankEditor();
-                                      } else if (isPlankSetPage) {
-                                        _startPlankSet(plankSetTypes);
+                                      } else if (isAddSetPage) {
+                                        _openCustomPlankSetEditor();
+                                      } else if (isOfficialSetPage) {
+                                        await _startPlankSet(
+                                          plankSet: officialSet,
+                                          plankTypes: officialSetTypes,
+                                          secondsByPlankId: officialSetSeconds,
+                                        );
+                                      } else if (activeCustomSet != null) {
+                                        final types =
+                                            CustomPlankSetCarouselPanel
+                                                .resolvePlankTypes(
+                                          plankTypes,
+                                          activeCustomSet,
+                                        );
+                                        await _startPlankSet(
+                                          plankSet:
+                                              activeCustomSet.toDefinition(),
+                                          plankTypes: types,
+                                          secondsByPlankId:
+                                              _secondsForCustomSet(
+                                            activeCustomSet,
+                                          ),
+                                        );
                                       } else if (activePlank != null) {
                                         final seconds = TargetSeconds.clamp(
                                           ref.read(targetSecondsProvider) ??
                                               activePlank.defaultSeconds,
                                         );
-                                        _startPlank(activePlank, seconds);
+                                        await _startPlank(
+                                          activePlank,
+                                          seconds,
+                                        );
                                       }
                                     },
                                     icon: Icon(
-                                      isAddPage
+                                      isAddPlankPage || isAddSetPage
                                           ? Icons.add
                                           : Icons.play_arrow,
                                       size: 24,
                                     ),
                                     label: Text(
-                                      isAddPage ? "種目を追加" : "スタート",
+                                      isAddPlankPage
+                                          ? "種目を追加"
+                                          : isAddSetPage
+                                              ? "セットを作る"
+                                              : "スタート",
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,

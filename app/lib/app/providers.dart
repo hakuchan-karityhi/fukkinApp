@@ -8,6 +8,8 @@ import "../infrastructure/master/plank_set_defaults.dart";
 import "../domain/models/streak_state.dart";
 import "../domain/models/user_progress.dart";
 import "../domain/repositories/game_constants_repository.dart";
+import "../domain/models/custom_plank_set.dart";
+import "../domain/repositories/custom_plank_set_repository.dart";
 import "../domain/repositories/custom_plank_type_repository.dart";
 import "../domain/repositories/plank_type_repository.dart";
 import "../domain/models/custom_plank_type.dart";
@@ -30,6 +32,7 @@ import "../application/reset_progress_usecase.dart";
 import "../infrastructure/local/app_database.dart";
 import "../infrastructure/local/streak_repository.dart";
 import "../infrastructure/local/user_progress_repository.dart";
+import "../infrastructure/local/custom_plank_set_repository.dart";
 import "../infrastructure/local/custom_plank_type_repository.dart";
 import "../infrastructure/local/workout_repository.dart";
 import "../infrastructure/master/composite_plank_type_repository.dart";
@@ -126,6 +129,19 @@ final customPlankTypesProvider =
     FutureProvider<List<CustomPlankType>>((ref) async {
   return ref.watch(customPlankTypeRepositoryProvider).getAll();
 });
+
+final customPlankSetRepositoryProvider =
+    Provider<CustomPlankSetRepository>((ref) {
+  return DriftCustomPlankSetRepository(ref.watch(appDatabaseProvider));
+});
+
+final customPlankSetsProvider =
+    FutureProvider<List<CustomPlankSet>>((ref) async {
+  return ref.watch(customPlankSetRepositoryProvider).getAll();
+});
+
+final customPlankSetTargetSecondsProvider =
+    StateProvider<Map<String, Map<String, int>>>((ref) => {});
 
 final userProgressRepositoryProvider = Provider<UserProgressRepository>((ref) {
   return DriftUserProgressRepository(ref.watch(appDatabaseProvider));
