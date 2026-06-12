@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "../album/album_screen.dart";
 import "../home/home_screen.dart";
 import "../records/records_screen.dart";
 import "../settings/settings_screen.dart";
@@ -17,6 +18,7 @@ class _MainShellState extends State<MainShell> {
   static const _tabs = [
     _TabItem(label: "home", icon: Icons.home_outlined),
     _TabItem(label: "記録", icon: Icons.calendar_month_outlined),
+    _TabItem(label: "アルバム", icon: Icons.collections_outlined),
     _TabItem(label: "設定", icon: Icons.settings_outlined),
   ];
 
@@ -28,6 +30,7 @@ class _MainShellState extends State<MainShell> {
         children: const [
           HomeScreen(),
           RecordsScreen(),
+          AlbumScreen(),
           SettingsScreen(),
         ],
       ),
