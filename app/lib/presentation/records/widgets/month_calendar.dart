@@ -6,6 +6,8 @@ class MonthCalendar extends StatelessWidget {
     required this.year,
     required this.month,
     required this.workoutDates,
+    required this.selectedDate,
+    required this.onDateSelected,
     required this.onPreviousMonth,
     required this.onNextMonth,
   });
@@ -13,8 +15,14 @@ class MonthCalendar extends StatelessWidget {
   final int year;
   final int month;
   final Set<DateTime> workoutDates;
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
+
+  static bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,24 +82,42 @@ class MonthCalendar extends StatelessWidget {
                 }
 
                 final date = DateTime(year, month, day);
-                final hasWorkout = workoutDates.contains(date);
+                final hasWorkout = workoutDates.any(
+                  (workoutDate) => isSameDay(workoutDate, date),
+                );
+                final isSelected = isSameDay(selectedDate, date);
 
-                return Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: hasWorkout
-                        ? colorScheme.primaryContainer
-                        : Colors.transparent,
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    "$day",
-                    style: TextStyle(
-                      fontWeight:
-                          hasWorkout ? FontWeight.bold : FontWeight.normal,
-                      color: hasWorkout
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurface,
+                    onTap: () => onDateSelected(date),
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colorScheme.primary
+                            : hasWorkout
+                                ? colorScheme.primaryContainer
+                                : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: isSelected
+                            ? Border.all(color: colorScheme.primary, width: 2)
+                            : null,
+                      ),
+                      child: Text(
+                        "$day",
+                        style: TextStyle(
+                          fontWeight: hasWorkout || isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isSelected
+                              ? colorScheme.onPrimary
+                              : hasWorkout
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                   ),
                 );
