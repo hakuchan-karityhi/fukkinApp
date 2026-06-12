@@ -60,6 +60,15 @@ class MilestoneAchievementEntries extends Table {
   Set<Column<Object>> get primaryKey => {days};
 }
 
+class CustomPlankTypeEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     UserProgressEntries,
@@ -67,6 +76,7 @@ class MilestoneAchievementEntries extends Table {
     WorkoutRecordEntries,
     MilestoneTargetEntries,
     MilestoneAchievementEntries,
+    CustomPlankTypeEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -75,10 +85,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
+
+  static const _createCustomPlankTypeTableSql = """
+CREATE TABLE IF NOT EXISTS custom_plank_type_entries (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+)
+""";
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        beforeOpen: (details) async {
+          // v3 時点で user_version のみ進みテーブル未作成、という端末向けの保険
+          await customStatement(_createCustomPlankTypeTableSql);
+        },
         onCreate: (Migrator m) async {
           await m.createAll();
         },
@@ -86,6 +108,12 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(milestoneTargetEntries);
             await m.createTable(milestoneAchievementEntries);
+          }
+          if (from < 3) {
+            await m.createTable(customPlankTypeEntries);
+          }
+          if (from < 4) {
+            await customStatement(_createCustomPlankTypeTableSql);
           }
         },
       );

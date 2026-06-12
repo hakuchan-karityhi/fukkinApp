@@ -3,9 +3,12 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
+import "../../domain/services/custom_plank_type_mapper.dart";
+import "../custom_plank_type/custom_plank_type_editor_screen.dart";
 import "../plank_session/plank_session_screen.dart";
 import "../plank_set/plank_set_session_screen.dart";
 import "../widgets/target_seconds_stepper.dart";
+import "widgets/add_custom_plank_type_panel.dart";
 import "widgets/character_panel.dart";
 import "widgets/exercise_panel.dart";
 import "widgets/home_header.dart";
@@ -115,6 +118,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.invalidate(todayWorkoutSummaryProvider);
   }
 
+  Future<void> _openCustomPlankEditor({String? existingId}) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CustomPlankTypeEditorScreen(existingId: existingId),
+      ),
+    );
+
+    if (saved == true && mounted) {
+      ref.invalidate(customPlankTypesProvider);
+      ref.invalidate(plankTypesProvider);
+    }
+  }
+
+  int _addPageIndex(int plankCount) => plankCount + 1;
+
+  int _setPageIndex(int plankCount) => plankCount + 2;
+
   @override
   Widget build(BuildContext context) {
     final plankTypesAsync = ref.watch(plankTypesProvider);
@@ -139,10 +159,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 final plankSetTypes = plankSetTypesAsync.valueOrNull ?? const [];
 
-                final exerciseCount = plankTypes.length + 1;
+                final plankCount = plankTypes.length;
+                final exerciseCount = plankCount + 2;
+                final addPageIndex = _addPageIndex(plankCount);
+                final setPageIndex = _setPageIndex(plankCount);
                 final selectedIndex = ref.watch(selectedPlankIndexProvider);
-                final clampedIndex =
-                    selectedIndex.clamp(0, plankTypes.length - 1);
+                final clampedIndex = selectedIndex.clamp(0, plankCount - 1);
                 if (selectedIndex != clampedIndex) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     ref.read(selectedPlankIndexProvider.notifier).state =
@@ -157,13 +179,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final plankSetSeconds =
                     ref.watch(plankSetTargetSecondsProvider);
                 final isExercisePage = _currentPage > 0;
-                final isPlankSetPage = _currentPage == exerciseCount;
+                final isAddPage = _currentPage == addPageIndex;
+                final isPlankSetPage = _currentPage == setPageIndex;
                 final activePlankIndex = isPlankSetPage
-                    ? plankTypes.length
-                    : (isExercisePage ? _currentPage - 1 : clampedIndex);
-                final activePlank = isPlankSetPage
+                    ? plankCount + 1
+                    : isAddPage
+                        ? plankCount
+                        : (isExercisePage ? _currentPage - 1 : clampedIndex);
+                final activePlank = isPlankSetPage || isAddPage
                     ? null
-                    : plankTypes[activePlankIndex.clamp(0, plankTypes.length - 1)];
+                    : plankTypes[activePlankIndex.clamp(0, plankCount - 1)];
 
                 return Stack(
                   children: [
@@ -193,7 +218,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         .read(targetSecondsProvider.notifier)
                                         .state = TargetSeconds.clamp(seconds);
                                   },
+                                  onEdit: CustomPlankTypeMapper.isCustomPlankTypeId(
+                                    plankTypes[i].id,
+                                  )
+                                      ? () => _openCustomPlankEditor(
+                                            existingId: plankTypes[i].id,
+                                          )
+                                      : null,
                                 ),
+                              AddCustomPlankTypePanel(
+                                onAdd: () => _openCustomPlankEditor(),
+                              ),
                               PlankSetDetailPanel(
                                 setName: plankSet.name,
                                 plankTypes: plankSetTypes,
@@ -261,19 +296,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   height: 52,
                                   child: FilledButton.icon(
                                     onPressed: () {
-                                      if (isPlankSetPage) {
+                                      if (isAddPage) {
+                                        _openCustomPlankEditor();
+                                      } else if (isPlankSetPage) {
                                         _startPlankSet(plankSetTypes);
                                       } else if (activePlank != null) {
-                                        _startPlank(
-                                          activePlank,
-                                          targetSeconds,
+                                        final seconds = TargetSeconds.clamp(
+                                          ref.read(targetSecondsProvider) ??
+                                              activePlank.defaultSeconds,
                                         );
+                                        _startPlank(activePlank, seconds);
                                       }
                                     },
-                                    icon: const Icon(Icons.play_arrow, size: 24),
-                                    label: const Text(
-                                      "スタート",
-                                      style: TextStyle(
+                                    icon: Icon(
+                                      isAddPage
+                                          ? Icons.add
+                                          : Icons.play_arrow,
+                                      size: 24,
+                                    ),
+                                    label: Text(
+                                      isAddPage ? "種目を追加" : "スタート",
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),

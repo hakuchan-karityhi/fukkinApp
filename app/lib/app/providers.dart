@@ -8,7 +8,9 @@ import "../infrastructure/master/plank_set_defaults.dart";
 import "../domain/models/streak_state.dart";
 import "../domain/models/user_progress.dart";
 import "../domain/repositories/game_constants_repository.dart";
+import "../domain/repositories/custom_plank_type_repository.dart";
 import "../domain/repositories/plank_type_repository.dart";
+import "../domain/models/custom_plank_type.dart";
 import "../domain/repositories/streak_repository.dart";
 import "../domain/repositories/user_progress_repository.dart";
 import "../domain/repositories/workout_repository.dart";
@@ -28,7 +30,9 @@ import "../application/reset_progress_usecase.dart";
 import "../infrastructure/local/app_database.dart";
 import "../infrastructure/local/streak_repository.dart";
 import "../infrastructure/local/user_progress_repository.dart";
+import "../infrastructure/local/custom_plank_type_repository.dart";
 import "../infrastructure/local/workout_repository.dart";
+import "../infrastructure/master/composite_plank_type_repository.dart";
 import "../infrastructure/master/plank_type_repository.dart";
 import "../infrastructure/master/character_dialogue_repository.dart";
 import "../infrastructure/remote_config/remote_config_game_constants_repository.dart";
@@ -102,9 +106,26 @@ final penaltyServiceProvider = Provider<PenaltyService?>((ref) {
   return PenaltyService(constants, level);
 });
 
-final plankTypeRepositoryProvider = Provider<PlankTypeRepository>(
+final assetPlankTypeRepositoryProvider = Provider<AssetPlankTypeRepository>(
   (ref) => AssetPlankTypeRepository(),
 );
+
+final customPlankTypeRepositoryProvider =
+    Provider<CustomPlankTypeRepository>((ref) {
+  return DriftCustomPlankTypeRepository(ref.watch(appDatabaseProvider));
+});
+
+final plankTypeRepositoryProvider = Provider<PlankTypeRepository>(
+  (ref) => CompositePlankTypeRepository(
+    assetRepository: ref.watch(assetPlankTypeRepositoryProvider),
+    customPlankTypeRepository: ref.watch(customPlankTypeRepositoryProvider),
+  ),
+);
+
+final customPlankTypesProvider =
+    FutureProvider<List<CustomPlankType>>((ref) async {
+  return ref.watch(customPlankTypeRepositoryProvider).getAll();
+});
 
 final userProgressRepositoryProvider = Provider<UserProgressRepository>((ref) {
   return DriftUserProgressRepository(ref.watch(appDatabaseProvider));
