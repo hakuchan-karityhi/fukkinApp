@@ -93,7 +93,7 @@ else
   die "チケット番号の形式が不正です: $TICKET_ARG（例: 009, mvp/011）"
 fi
 
-TICKET_PADDED="$(printf '%03d' "$TICKET_NUM")"
+TICKET_PADDED="$(printf '%03d' "$((10#$TICKET_NUM))")"
 
 find_ticket_file() {
   local phase="$1"

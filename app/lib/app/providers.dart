@@ -2,6 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../domain/models/game_constants.dart";
 import "../domain/models/plank_set.dart";
+import "../domain/models/workout_record.dart";
 import "../domain/models/plank_type.dart";
 import "../infrastructure/master/plank_set_defaults.dart";
 import "../domain/models/streak_state.dart";
@@ -43,6 +44,12 @@ class TodayWorkoutSummary {
   final int sessionCount;
   final int earnedExpToday;
 }
+
+final workoutRecordsByDateProvider =
+    FutureProvider.family<List<WorkoutRecord>, DateTime>((ref, date) async {
+  final normalized = DateTime(date.year, date.month, date.day);
+  return ref.watch(workoutRepositoryProvider).getByDate(normalized);
+});
 
 final todayWorkoutSummaryProvider =
     FutureProvider<TodayWorkoutSummary>((ref) async {

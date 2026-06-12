@@ -3,12 +3,18 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/milestone.dart";
 import "../../domain/models/streak_state.dart";
+import "widgets/day_workout_list.dart";
 import "widgets/milestone_target_editor.dart";
 import "widgets/month_calendar.dart";
 
 final _recordsMonthProvider = StateProvider<DateTime>((ref) {
   final now = DateTime.now();
   return DateTime(now.year, now.month);
+});
+
+final _selectedDateProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
 });
 
 final _monthWorkoutDatesProvider =
@@ -25,10 +31,14 @@ class RecordsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final month = ref.watch(_recordsMonthProvider);
+    final selectedDate = ref.watch(_selectedDateProvider);
     final streakAsync = ref.watch(streakStateProvider);
     final targetsAsync = ref.watch(milestoneTargetsProvider);
     final achievementsAsync = ref.watch(milestoneAchievementsProvider);
     final workoutDatesAsync = ref.watch(_monthWorkoutDatesProvider(month));
+    final dayRecordsAsync =
+        ref.watch(workoutRecordsByDateProvider(selectedDate));
+    final plankTypesAsync = ref.watch(plankTypesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text("記録")),
@@ -38,6 +48,7 @@ class RecordsScreen extends ConsumerWidget {
           ref.invalidate(milestoneTargetsProvider);
           ref.invalidate(milestoneAchievementsProvider);
           ref.invalidate(_monthWorkoutDatesProvider(month));
+          ref.invalidate(workoutRecordsByDateProvider(selectedDate));
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -47,6 +58,14 @@ class RecordsScreen extends ConsumerWidget {
                 year: month.year,
                 month: month.month,
                 workoutDates: dates,
+                selectedDate: selectedDate,
+                onDateSelected: (date) {
+                  ref.read(_selectedDateProvider.notifier).state = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                  );
+                },
                 onPreviousMonth: () {
                   ref.read(_recordsMonthProvider.notifier).state = DateTime(
                     month.year,
@@ -68,6 +87,23 @@ class RecordsScreen extends ConsumerWidget {
               data: (streak) => _StreakSummaryCard(streak: streak),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
+            dayRecordsAsync.when(
+              data: (records) => plankTypesAsync.when(
+                data: (plankTypes) => DayWorkoutList(
+                  selectedDate: selectedDate,
+                  records: records,
+                  plankTypeNames: {
+                    for (final plank in plankTypes) plank.id: plank.name,
+                  },
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) =>
+                    Text("種目名の読み込みに失敗: $error"),
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text("履歴の読み込みに失敗: $error"),
             ),
             const SizedBox(height: 16),
             targetsAsync.when(
