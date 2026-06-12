@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "../../../domain/models/plank_type.dart";
 import "../../widgets/plank_pose_view.dart";
+import "../../widgets/target_seconds_stepper.dart";
 
 class PlankDetailPanel extends StatelessWidget {
   const PlankDetailPanel({
@@ -15,9 +16,6 @@ class PlankDetailPanel extends StatelessWidget {
   final int targetSeconds;
   final ValueChanged<int> onTargetSecondsChanged;
 
-  static const _minSeconds = 10;
-  static const _maxSeconds = 120;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,12 +25,24 @@ class PlankDetailPanel extends StatelessWidget {
         children: [
           PlankPoseView(plankType: plank, size: 180, showLabel: false),
           const SizedBox(height: 4),
-          Text(
-            plank.name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              Text(
+                plank.name,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              TargetSecondsStepper(
+                seconds: targetSeconds,
+                onChanged: onTargetSecondsChanged,
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Center(child: _DifficultyStars(difficulty: plank.difficulty)),
@@ -43,50 +53,6 @@ class PlankDetailPanel extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
-          const SizedBox(height: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "目標秒数",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    "$targetSeconds秒",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
-              ),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 10,
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 16,
-                  ),
-                  overlayShape: const RoundSliderOverlayShape(
-                    overlayRadius: 24,
-                  ),
-                ),
-                child: Slider(
-                  value: targetSeconds.toDouble(),
-                  min: _minSeconds.toDouble(),
-                  max: _maxSeconds.toDouble(),
-                  divisions: _maxSeconds - _minSeconds,
-                  label: "$targetSeconds秒",
-                  onChanged: (value) =>
-                      onTargetSecondsChanged(value.round()),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );

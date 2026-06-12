@@ -212,3 +212,6 @@ final resetProgressUseCaseProvider = Provider<ResetProgressUseCase>((ref) {
 final selectedPlankIndexProvider = StateProvider<int>((ref) => 0);
 
 final targetSecondsProvider = StateProvider<int?>((ref) => null);
+
+final plankSetTargetSecondsProvider =
+    StateProvider<Map<String, int>>((ref) => {});

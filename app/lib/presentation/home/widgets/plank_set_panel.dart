@@ -2,18 +2,21 @@ import "package:flutter/material.dart";
 
 import "../../../domain/models/plank_type.dart";
 import "../../widgets/plank_pose_view.dart";
+import "../../widgets/target_seconds_stepper.dart";
 
 class PlankSetDetailPanel extends StatelessWidget {
   const PlankSetDetailPanel({
     super.key,
     required this.setName,
     required this.plankTypes,
-    required this.targetSeconds,
+    required this.targetSecondsByPlankId,
+    required this.onTargetSecondsChanged,
   });
 
   final String setName;
   final List<PlankType> plankTypes;
-  final int targetSeconds;
+  final Map<String, int> targetSecondsByPlankId;
+  final void Function(String plankId, int seconds) onTargetSecondsChanged;
 
   PlankType? get _basicPlank {
     for (final plank in plankTypes) {
@@ -48,11 +51,26 @@ class PlankSetDetailPanel extends StatelessWidget {
           const SizedBox(height: 12),
           for (final plank in plankTypes)
             Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                "${plank.name}$targetSeconds秒",
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      plank.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TargetSecondsStepper(
+                    compact: true,
+                    seconds: targetSecondsByPlankId[plank.id] ??
+                        plank.defaultSeconds,
+                    onChanged: (seconds) =>
+                        onTargetSecondsChanged(plank.id, seconds),
+                  ),
+                ],
               ),
             ),
         ],
