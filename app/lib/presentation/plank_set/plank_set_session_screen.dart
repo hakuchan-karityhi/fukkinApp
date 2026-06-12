@@ -15,12 +15,12 @@ class PlankSetSessionScreen extends ConsumerStatefulWidget {
     super.key,
     required this.plankSet,
     required this.plankTypes,
-    required this.targetSeconds,
+    required this.targetSecondsList,
   });
 
   final PlankSetDefinition plankSet;
   final List<PlankType> plankTypes;
-  final int targetSeconds;
+  final List<int> targetSecondsList;
 
   @override
   ConsumerState<PlankSetSessionScreen> createState() =>
@@ -35,6 +35,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
   int get _totalCount => widget.plankTypes.length;
   bool get _isLastPlank => _currentIndex >= _totalCount - 1;
   PlankType get _currentPlank => widget.plankTypes[_currentIndex];
+  int get _currentTargetSeconds => widget.targetSecondsList[_currentIndex];
 
   Future<bool> _confirmAbortSet() async {
     final hasCompleted = _completedResults.isNotEmpty;
@@ -76,7 +77,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
 
     final result = await useCase.execute(
       plankTypeId: _currentPlank.id,
-      targetSeconds: widget.targetSeconds,
+      targetSeconds: _currentTargetSeconds,
     );
     _completedResults.add(result);
 
@@ -100,7 +101,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
     final setResult = PlankSetResult(
       setId: widget.plankSet.id,
       setName: widget.plankSet.name,
-      targetSeconds: widget.targetSeconds,
+      targetSeconds: widget.targetSecondsList.first,
       plankResults: List.unmodifiable(_completedResults),
       totalEarnedExp:
           _completedResults.fold(0, (sum, item) => sum + item.earnedExp),
@@ -165,7 +166,7 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
                 : PlankExerciseTimer(
                     key: ValueKey(_currentIndex),
                     plankType: _currentPlank,
-                    targetSeconds: widget.targetSeconds,
+                    targetSeconds: _currentTargetSeconds,
                     progressLabel: "${_currentIndex + 1}/$_totalCount",
                     onExitConfirmed: () async {
                       if (await _confirmAbortSet()) {

@@ -5,6 +5,7 @@ import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_session_screen.dart";
 import "../plank_set/plank_set_session_screen.dart";
+import "../widgets/target_seconds_stepper.dart";
 import "widgets/character_panel.dart";
 import "widgets/exercise_panel.dart";
 import "widgets/home_header.dart";
@@ -40,8 +41,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (page > 0 && page <= plankTypes.length) {
       final plankIndex = page - 1;
       ref.read(selectedPlankIndexProvider.notifier).state = plankIndex;
-      ref.read(targetSecondsProvider.notifier).state =
-          plankTypes[plankIndex].defaultSeconds;
+      ref.read(targetSecondsProvider.notifier).state = TargetSeconds.clamp(
+        plankTypes[plankIndex].defaultSeconds,
+      );
     }
   }
 
@@ -71,9 +73,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _invalidateHomeData();
   }
 
-  Future<void> _startPlankSet(int targetSeconds) async {
+  Future<void> _startPlankSet(List<PlankType> plankTypes) async {
     final plankSet = ref.read(plankSetDefinitionProvider);
-    final plankTypes = await ref.read(plankSetPlankTypesProvider.future);
+    final secondsByPlankId = ref.read(plankSetTargetSecondsProvider);
 
     if (plankTypes.length != plankSet.plankTypeIds.length) {
       if (!mounted) return;
@@ -83,6 +85,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
+    final targetSecondsList = [
+      for (final plank in plankTypes)
+        TargetSeconds.clamp(
+          secondsByPlankId[plank.id] ?? plank.defaultSeconds,
+        ),
+    ];
+
     if (!mounted) return;
 
     await Navigator.of(context).push<void>(
@@ -90,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (_) => PlankSetSessionScreen(
           plankSet: plankSet,
           plankTypes: plankTypes,
-          targetSeconds: targetSeconds,
+          targetSecondsList: targetSecondsList,
         ),
       ),
     );
@@ -141,8 +150,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   });
                 }
 
-                final targetSeconds = ref.watch(targetSecondsProvider) ??
-                    plankTypes[clampedIndex].defaultSeconds;
+                final targetSeconds = TargetSeconds.clamp(
+                  ref.watch(targetSecondsProvider) ??
+                      plankTypes[clampedIndex].defaultSeconds,
+                );
+                final plankSetSeconds =
+                    ref.watch(plankSetTargetSecondsProvider);
                 final isExercisePage = _currentPage > 0;
                 final isPlankSetPage = _currentPage == exerciseCount;
                 final activePlankIndex = isPlankSetPage
@@ -178,13 +191,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   onTargetSecondsChanged: (seconds) {
                                     ref
                                         .read(targetSecondsProvider.notifier)
-                                        .state = seconds;
+                                        .state = TargetSeconds.clamp(seconds);
                                   },
                                 ),
                               PlankSetDetailPanel(
                                 setName: plankSet.name,
                                 plankTypes: plankSetTypes,
-                                targetSeconds: targetSeconds,
+                                targetSecondsByPlankId: plankSetSeconds,
+                                onTargetSecondsChanged: (plankId, seconds) {
+                                  ref
+                                      .read(
+                                        plankSetTargetSecondsProvider.notifier,
+                                      )
+                                      .state = {
+                                    ...plankSetSeconds,
+                                    plankId: TargetSeconds.clamp(seconds),
+                                  };
+                                },
                               ),
                             ],
                           ),
@@ -239,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   child: FilledButton.icon(
                                     onPressed: () {
                                       if (isPlankSetPage) {
-                                        _startPlankSet(targetSeconds);
+                                        _startPlankSet(plankSetTypes);
                                       } else if (activePlank != null) {
                                         _startPlank(
                                           activePlank,
