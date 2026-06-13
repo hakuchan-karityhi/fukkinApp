@@ -4,7 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_result.dart";
 import "../widgets/exp_gain_progress_bar.dart";
-import "../widgets/milestone_celebration.dart";
+import "streak_celebration_screen.dart";
 
 class PlankResultScreen extends ConsumerWidget {
   const PlankResultScreen({super.key, required this.result});
@@ -15,101 +15,90 @@ class PlankResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final milestone = result.milestoneReached;
     final thresholds =
         ref.watch(gameConstantsProvider).valueOrNull?.levelThresholds ??
             const [150, 400, 800, 1400];
     final totalExpBefore = result.totalExpAfter - result.earnedExp;
-    final animationDelay = Duration(
-      milliseconds: milestone != null ? 600 : 0,
-    );
 
     return Scaffold(
       appBar: AppBar(title: const Text("結果")),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (milestone != null) ...[
-              MilestoneCelebration(milestone: milestone),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => openStreakCelebrationScreen(
+          context,
+          streakAfter: result.streakAfter,
+          streakIncreased: result.streakIncreased,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                result.plankTypeName,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "完了！",
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
+              ExpGainProgressBar(
+                totalExpBefore: totalExpBefore,
+                totalExpAfter: result.totalExpAfter,
+                earnedExp: result.earnedExp,
+                levelThresholds: thresholds,
+              ),
+              const SizedBox(height: 16),
+              Text("基本EXP: ${result.baseExp}"),
+              if (result.repeatSessionBonusPercent > 0)
+                Text(
+                  "再実施（${result.sessionIndexOfDay}回目 "
+                  "+${result.repeatSessionBonusPercent}%）",
+                ),
+              if (result.dailyCapReached)
+                Text(
+                  "本日の獲得上限に達したため EXP が調整されました",
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              if (result.levelUp)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "レベルアップ！ Lv ${result.levelAfter}",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Center(
+                  child: Image.asset(
+                    _characterImageAsset,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              Text(
+                "タップして続ける",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
             ],
-            Text(
-              result.plankTypeName,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "完了！",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ExpGainProgressBar(
-              totalExpBefore: totalExpBefore,
-              totalExpAfter: result.totalExpAfter,
-              earnedExp: result.earnedExp,
-              levelThresholds: thresholds,
-              startDelay: animationDelay,
-            ),
-            const SizedBox(height: 16),
-            Text("基本EXP: ${result.baseExp}"),
-            if (result.repeatSessionBonusPercent > 0)
-              Text(
-                "再実施（${result.sessionIndexOfDay}回目 "
-                "+${result.repeatSessionBonusPercent}%）",
-              ),
-            if (result.dailyCapReached)
-              Text(
-                "本日の獲得上限に達したため EXP が調整されました",
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            if (result.levelUp)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  "レベルアップ！ Lv ${result.levelAfter}",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  _characterImageAsset,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text(
-                  "ホームへ",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

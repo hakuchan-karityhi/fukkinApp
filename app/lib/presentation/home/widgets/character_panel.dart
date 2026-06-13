@@ -26,7 +26,7 @@ class CharacterPanel extends ConsumerWidget {
       child: progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(child: Icon(Icons.error_outline)),
-        data: (progress) => streakAsync.when(
+        data: (_) => streakAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, __) => const Center(child: Icon(Icons.error_outline)),
           data: (_) => dialoguesAsync.when(
@@ -50,8 +50,6 @@ class CharacterPanel extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text("Lv ${progress.level}"),
-                    Text("腹筋ステージ ${progress.absStage}"),
                   ],
                 ),
               );
