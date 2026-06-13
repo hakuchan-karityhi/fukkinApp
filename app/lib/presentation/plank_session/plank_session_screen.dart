@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_type.dart";
 import "../result/plank_result_screen.dart";
+import "../result/streak_celebration_screen.dart";
 import "plank_exercise_timer.dart";
 
 class PlankSessionScreen extends ConsumerWidget {
@@ -41,7 +42,11 @@ class PlankSessionScreen extends ConsumerWidget {
 
             await Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (_) => PlankResultScreen(result: result),
+                builder: (_) => StreakCelebrationScreen(
+                  streakAfter: result.streakAfter,
+                  streakIncreased: result.streakIncreased,
+                  nextScreen: PlankResultScreen(result: result),
+                ),
               ),
             );
           },

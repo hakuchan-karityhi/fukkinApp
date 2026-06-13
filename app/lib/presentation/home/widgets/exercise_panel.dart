@@ -68,57 +68,6 @@ class PlankDetailPanel extends StatelessWidget {
   }
 }
 
-class CarouselIndicator extends StatelessWidget {
-  const CarouselIndicator({
-    super.key,
-    required this.count,
-    required this.selectedIndex,
-    required this.onDotTap,
-  });
-
-  final int count;
-  final int selectedIndex;
-  final ValueChanged<int> onDotTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "${selectedIndex + 1} / $count",
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(count, (index) {
-                final selected = index == selectedIndex;
-                return GestureDetector(
-                  onTap: () => onDotTap(index),
-                  child: Container(
-                    width: selected ? 10 : 8,
-                    height: selected ? 10 : 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class HomeNavArrowButton extends StatelessWidget {
   const HomeNavArrowButton({super.key, required this.icon, this.onPressed});
 
@@ -156,6 +105,137 @@ class _DifficultyStars extends StatelessWidget {
           color: filled ? Colors.orange : Colors.grey,
         );
       }),
+    );
+  }
+}
+
+class VerticalScrollHint extends StatefulWidget {
+  const VerticalScrollHint({
+    super.key,
+    required this.currentIndex,
+    required this.pageCount,
+  });
+
+  final int currentIndex;
+  final int pageCount;
+
+  @override
+  State<VerticalScrollHint> createState() => _VerticalScrollHintState();
+}
+
+class _VerticalScrollHintState extends State<VerticalScrollHint>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
+    _pulse = Tween<double>(begin: 0.35, end: 1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  bool get _canScrollUp => widget.currentIndex > 0;
+  bool get _canScrollDown => widget.currentIndex < widget.pageCount - 1;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.pageCount <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    final background = Theme.of(context).scaffoldBackgroundColor;
+    final hintColor = Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          if (_canScrollUp)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 64,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      background.withValues(alpha: 0.92),
+                      background.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Icon(
+                      Icons.keyboard_arrow_up_rounded,
+                      size: 30,
+                      color: hintColor.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (_canScrollDown)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 88,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      background.withValues(alpha: 0.94),
+                      background.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FadeTransition(
+                      opacity: _pulse,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 34,
+                        color: hintColor.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    if (widget.currentIndex == 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        "上下にスワイプ",
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: hintColor.withValues(alpha: 0.85),
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

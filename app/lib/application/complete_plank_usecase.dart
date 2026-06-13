@@ -156,6 +156,8 @@ class CompletePlankUseCase {
       sessionIndexOfDay: sessionIndexOfDay,
       repeatSessionBonusPercent: repeatSessionBonusPercent,
       dailyCapReached: dailyCapReached,
+      streakMultiplier: streakMultiplier,
+      difficultyMultiplier: plankType.expMultiplier,
       milestoneReached: milestoneReached,
     );
   }

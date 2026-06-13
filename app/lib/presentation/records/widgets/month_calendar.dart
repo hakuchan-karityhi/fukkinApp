@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 
+import "../../widgets/hanko_mark.dart";
+
 class MonthCalendar extends StatelessWidget {
   const MonthCalendar({
     super.key,
@@ -99,24 +101,33 @@ class MonthCalendar extends StatelessWidget {
                             ? colorScheme.primary
                             : hasWorkout
                                 ? colorScheme.primaryContainer
+                                    .withValues(alpha: 0.2)
                                 : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: isSelected
                             ? Border.all(color: colorScheme.primary, width: 2)
                             : null,
                       ),
-                      child: Text(
-                        "$day",
-                        style: TextStyle(
-                          fontWeight: hasWorkout || isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected
-                              ? colorScheme.onPrimary
-                              : hasWorkout
-                                  ? colorScheme.onPrimaryContainer
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Text(
+                            "$day",
+                            style: TextStyle(
+                              fontWeight: hasWorkout || isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? colorScheme.onPrimary
                                   : colorScheme.onSurface,
-                        ),
+                            ),
+                          ),
+                          if (hasWorkout)
+                            Positioned(
+                              bottom: 2,
+                              child: HankoMark(size: 20),
+                            ),
+                        ],
                       ),
                     ),
                   ),

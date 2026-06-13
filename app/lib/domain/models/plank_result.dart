@@ -16,6 +16,8 @@ class PlankResult {
     required this.sessionIndexOfDay,
     required this.repeatSessionBonusPercent,
     required this.dailyCapReached,
+    required this.streakMultiplier,
+    required this.difficultyMultiplier,
     this.milestoneReached,
   });
 
@@ -33,5 +35,7 @@ class PlankResult {
   final int sessionIndexOfDay;
   final int repeatSessionBonusPercent;
   final bool dailyCapReached;
+  final double streakMultiplier;
+  final double difficultyMultiplier;
   final MilestoneAchievement? milestoneReached;
 }

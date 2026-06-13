@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -179,6 +180,16 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
     }
   }
 
+  void _debugComplete() {
+    if (_phase == PlankSessionPhase.completing) return;
+    _timer?.cancel();
+    setState(() {
+      _remainingSeconds = 0;
+      _phase = PlankSessionPhase.completing;
+    });
+    unawaited(_handleTimerComplete());
+  }
+
   String? _buildCheerText() {
     if (_phase != PlankSessionPhase.running) return null;
 
@@ -200,37 +211,51 @@ class _PlankExerciseTimerState extends ConsumerState<PlankExerciseTimer>
     final displaySeconds =
         _phase == PlankSessionPhase.preparing ? _preparingCount : _remainingSeconds;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        PlankSessionHeader(
-          plankName: widget.plankType.name,
-          setName: widget.setName,
-          progressLabel: widget.progressLabel,
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            PlankSessionHeader(
+              plankName: widget.plankType.name,
+              setName: widget.setName,
+              progressLabel: widget.progressLabel,
+            ),
+            const SizedBox(height: 12),
+            PlankPoseView(
+              plankType: widget.plankType,
+              size: 200,
+              showLabel: false,
+            ),
+            if (cheerText != null) ...[
+              const SizedBox(height: 12),
+              DialogueBubble(text: cheerText),
+            ],
+            const SizedBox(height: 16),
+            if (_phase == PlankSessionPhase.preparing)
+              Text(
+                "開始まで",
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            Text(
+              "$displaySeconds",
+              style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
+            ),
+            Text(_phase == PlankSessionPhase.preparing ? "" : "秒"),
+            const SizedBox(height: 24),
+            _buildActionButtons(),
+          ],
         ),
-        const SizedBox(height: 12),
-        PlankPoseView(
-          plankType: widget.plankType,
-          size: 200,
-          showLabel: false,
-        ),
-        if (cheerText != null) ...[
-          const SizedBox(height: 12),
-          DialogueBubble(text: cheerText),
-        ],
-        const SizedBox(height: 16),
-        if (_phase == PlankSessionPhase.preparing)
-          Text(
-            "開始まで",
-            style: Theme.of(context).textTheme.titleMedium,
+        if (kDebugMode && _phase != PlankSessionPhase.completing)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: TextButton(
+              onPressed: _debugComplete,
+              child: const Text("debug"),
+            ),
           ),
-        Text(
-          "$displaySeconds",
-          style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
-        ),
-        Text(_phase == PlankSessionPhase.preparing ? "" : "秒"),
-        const SizedBox(height: 24),
-        _buildActionButtons(),
       ],
     );
   }

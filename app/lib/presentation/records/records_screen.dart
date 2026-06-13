@@ -17,14 +17,6 @@ final _selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
-final _monthWorkoutDatesProvider =
-    FutureProvider.family<Set<DateTime>, DateTime>((ref, month) async {
-  return ref.watch(workoutRepositoryProvider).getWorkoutDatesInMonth(
-        month.year,
-        month.month,
-      );
-});
-
 class RecordsScreen extends ConsumerWidget {
   const RecordsScreen({super.key});
 
@@ -35,7 +27,7 @@ class RecordsScreen extends ConsumerWidget {
     final streakAsync = ref.watch(streakStateProvider);
     final targetsAsync = ref.watch(milestoneTargetsProvider);
     final achievementsAsync = ref.watch(milestoneAchievementsProvider);
-    final workoutDatesAsync = ref.watch(_monthWorkoutDatesProvider(month));
+    final workoutDatesAsync = ref.watch(monthWorkoutDatesProvider(month));
     final dayRecordsAsync =
         ref.watch(workoutRecordsByDateProvider(selectedDate));
     final plankTypesAsync = ref.watch(plankTypesProvider);
@@ -47,12 +39,18 @@ class RecordsScreen extends ConsumerWidget {
           ref.invalidate(streakStateProvider);
           ref.invalidate(milestoneTargetsProvider);
           ref.invalidate(milestoneAchievementsProvider);
-          ref.invalidate(_monthWorkoutDatesProvider(month));
+          ref.invalidate(monthWorkoutDatesProvider(month));
           ref.invalidate(workoutRecordsByDateProvider(selectedDate));
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            streakAsync.when(
+              data: (streak) => _StreakSummaryCard(streak: streak),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
             workoutDatesAsync.when(
               data: (dates) => MonthCalendar(
                 year: month.year,
@@ -81,12 +79,6 @@ class RecordsScreen extends ConsumerWidget {
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Text("カレンダーの読み込みに失敗: $error"),
-            ),
-            const SizedBox(height: 16),
-            streakAsync.when(
-              data: (streak) => _StreakSummaryCard(streak: streak),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             dayRecordsAsync.when(

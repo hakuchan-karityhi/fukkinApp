@@ -27,68 +27,52 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final _pageController = PageController();
-  int _currentPage = 0;
+  static const _horizontalHomePage = 0;
+  static const _horizontalPlankPage = 1;
+  static const _horizontalSetPage = 2;
+
+  final _horizontalPageController = PageController();
+  final _plankPageController = PageController();
+  final _setPageController = PageController();
+
+  int _horizontalPage = 0;
+  int _plankVerticalPage = 0;
+  int _setVerticalPage = 0;
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _horizontalPageController.dispose();
+    _plankPageController.dispose();
+    _setPageController.dispose();
     super.dispose();
   }
 
-  void _goToPage(int page) {
-    _pageController.animateToPage(
+  void _goToHorizontalPage(int page) {
+    _horizontalPageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
   }
 
-  void _onPageChanged(int page, List<PlankType> plankTypes) {
-    setState(() => _currentPage = page);
-    if (page > 0 && page <= plankTypes.length) {
-      final plankIndex = page - 1;
-      ref.read(selectedPlankIndexProvider.notifier).state = plankIndex;
+  void _onPlankVerticalPageChanged(int page, List<PlankType> plankTypes) {
+    setState(() => _plankVerticalPage = page);
+    if (page < plankTypes.length) {
+      ref.read(selectedPlankIndexProvider.notifier).state = page;
       ref.read(targetSecondsProvider.notifier).state = TargetSeconds.clamp(
-        plankTypes[plankIndex].defaultSeconds,
+        plankTypes[page].defaultSeconds,
       );
     }
   }
 
-  int _exercisePageCount(int plankCount, int customSetCount) =>
-      plankCount + customSetCount + 3;
-
-  int _addPlankPageIndex(int plankCount) => plankCount + 1;
-
-  int _officialSetPageIndex(int plankCount) => plankCount + 2;
-
-  int _addSetPageIndex(int plankCount, int customSetCount) =>
-      plankCount + 3 + customSetCount;
-
-  int _activeCarouselIndex({
-    required int page,
-    required int plankCount,
-    required int customSetCount,
-  }) {
-    if (page <= plankCount) return page - 1;
-    if (page == _addPlankPageIndex(plankCount)) return plankCount;
-    if (page == _officialSetPageIndex(plankCount)) return plankCount + 1;
-    if (page < _addSetPageIndex(plankCount, customSetCount)) {
-      return plankCount + 2 + (page - plankCount - 3);
-    }
-    return plankCount + 2 + customSetCount;
+  VoidCallback? _onPreviousHorizontal() {
+    if (_horizontalPage == _horizontalHomePage) return null;
+    return () => _goToHorizontalPage(_horizontalPage - 1);
   }
 
-  VoidCallback? _onPreviousPage(int exercisePageCount) {
-    if (_currentPage == 0) return null;
-    if (_currentPage == 1) return () => _goToPage(0);
-    return () => _goToPage(_currentPage - 1);
-  }
-
-  VoidCallback _onNextPage(int exercisePageCount) {
-    if (_currentPage == 0) return () => _goToPage(1);
-    if (_currentPage >= exercisePageCount) return () => _goToPage(1);
-    return () => _goToPage(_currentPage + 1);
+  VoidCallback? _onNextHorizontal() {
+    if (_horizontalPage == _horizontalSetPage) return null;
+    return () => _goToHorizontalPage(_horizontalPage + 1);
   }
 
   Future<void> _startPlank(PlankType plankType, int targetSeconds) async {
@@ -193,6 +177,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     };
   }
 
+  Future<void> _onStartPressed({
+    required List<PlankType> plankTypes,
+    required int plankCount,
+    required List<CustomPlankSet> customSets,
+    required PlankSetDefinition officialSet,
+    required List<PlankType> officialSetTypes,
+    required Map<String, int> officialSetSeconds,
+  }) async {
+    if (_horizontalPage == _horizontalPlankPage) {
+      final addPlankPageIndex = plankCount;
+      if (_plankVerticalPage == addPlankPageIndex) {
+        _openCustomPlankEditor();
+        return;
+      }
+
+      final plank = plankTypes[_plankVerticalPage];
+      final seconds = TargetSeconds.clamp(
+        ref.read(targetSecondsProvider) ?? plank.defaultSeconds,
+      );
+      await _startPlank(plank, seconds);
+      return;
+    }
+
+    if (_horizontalPage == _horizontalSetPage) {
+      final addSetPageIndex = 1 + customSets.length;
+      if (_setVerticalPage == addSetPageIndex) {
+        _openCustomPlankSetEditor();
+        return;
+      }
+
+      if (_setVerticalPage == 0) {
+        await _startPlankSet(
+          plankSet: officialSet,
+          plankTypes: officialSetTypes,
+          secondsByPlankId: officialSetSeconds,
+        );
+        return;
+      }
+
+      final customSet = customSets[_setVerticalPage - 1];
+      final types = CustomPlankSetCarouselPanel.resolvePlankTypes(
+        plankTypes,
+        customSet,
+      );
+      await _startPlankSet(
+        plankSet: customSet.toDefinition(),
+        plankTypes: types,
+        secondsByPlankId: _secondsForCustomSet(customSet),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final plankTypesAsync = ref.watch(plankTypesProvider);
@@ -221,12 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     officialSetTypesAsync.valueOrNull ?? const [];
 
                 final plankCount = plankTypes.length;
-                final customSetCount = customSets.length;
-                final exercisePageCount =
-                    _exercisePageCount(plankCount, customSetCount);
-                final addPlankPage = _addPlankPageIndex(plankCount);
-                final officialSetPage = _officialSetPageIndex(plankCount);
-                final addSetPage = _addSetPageIndex(plankCount, customSetCount);
+                final setPageCount = 1 + customSets.length + 1;
 
                 final selectedIndex = ref.watch(selectedPlankIndexProvider);
                 final clampedIndex = selectedIndex.clamp(0, plankCount - 1);
@@ -244,33 +275,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final officialSetSeconds =
                     ref.watch(plankSetTargetSecondsProvider);
 
-                final isExercisePage = _currentPage > 0;
-                final isAddPlankPage = _currentPage == addPlankPage;
-                final isOfficialSetPage = _currentPage == officialSetPage;
-                final isAddSetPage = _currentPage == addSetPage;
-                final isCustomSetPage = _currentPage > officialSetPage &&
-                    _currentPage < addSetPage;
-                final customSetIndex =
-                    isCustomSetPage ? _currentPage - officialSetPage - 1 : -1;
-                final activeCustomSet = isCustomSetPage &&
-                        customSetIndex >= 0 &&
-                        customSetIndex < customSets.length
-                    ? customSets[customSetIndex]
-                    : null;
+                final isPlankSection = _horizontalPage == _horizontalPlankPage;
+                final isSetSection = _horizontalPage == _horizontalSetPage;
+                final isSelectionSection = isPlankSection || isSetSection;
 
-                final activeCarouselIndex = _activeCarouselIndex(
-                  page: _currentPage,
-                  plankCount: plankCount,
-                  customSetCount: customSetCount,
-                );
+                final isAddPlankPage =
+                    isPlankSection && _plankVerticalPage == plankCount;
+                final isAddSetPage =
+                    isSetSection && _setVerticalPage == setPageCount - 1;
 
-                final activePlank = isOfficialSetPage ||
-                        isAddPlankPage ||
-                        isAddSetPage ||
-                        isCustomSetPage
-                    ? null
-                    : plankTypes[
-                        activeCarouselIndex.clamp(0, plankCount - 1)];
+                final verticalPageCount =
+                    isPlankSection ? plankCount + 1 : setPageCount;
+                final verticalSelectedIndex =
+                    isPlankSection ? _plankVerticalPage : _setVerticalPage;
 
                 return Stack(
                   children: [
@@ -278,93 +295,137 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         HomeNavArrowButton(
                           icon: Icons.chevron_left,
-                          onPressed: _onPreviousPage(exercisePageCount),
+                          onPressed: _onPreviousHorizontal(),
                         ),
                         Expanded(
                           child: PageView(
-                            controller: _pageController,
+                            controller: _horizontalPageController,
                             physics: const ClampingScrollPhysics(),
-                            onPageChanged: (page) =>
-                                _onPageChanged(page, plankTypes),
+                            onPageChanged: (page) {
+                              setState(() => _horizontalPage = page);
+                            },
                             children: [
                               CharacterPanel(
                                 progressAsync: progressAsync,
                                 streakAsync: streakAsync,
                               ),
-                              for (var i = 0; i < plankTypes.length; i++)
-                                PlankDetailPanel(
-                                  plank: plankTypes[i],
-                                  targetSeconds: targetSeconds,
-                                  onTargetSecondsChanged: (seconds) {
-                                    ref
-                                        .read(targetSecondsProvider.notifier)
-                                        .state = TargetSeconds.clamp(seconds);
-                                  },
-                                  onEdit: CustomPlankTypeMapper
-                                          .isCustomPlankTypeId(plankTypes[i].id)
-                                      ? () => _openCustomPlankEditor(
-                                            existingId: plankTypes[i].id,
+                              PageView(
+                                controller: _plankPageController,
+                                scrollDirection: Axis.vertical,
+                                physics: const ClampingScrollPhysics(),
+                                onPageChanged: (page) =>
+                                    _onPlankVerticalPageChanged(
+                                  page,
+                                  plankTypes,
+                                ),
+                                children: [
+                                  for (var i = 0; i < plankTypes.length; i++)
+                                    PlankDetailPanel(
+                                      plank: plankTypes[i],
+                                      targetSeconds: i == _plankVerticalPage
+                                          ? targetSeconds
+                                          : TargetSeconds.clamp(
+                                              plankTypes[i].defaultSeconds,
+                                            ),
+                                      onTargetSecondsChanged: (seconds) {
+                                        ref
+                                            .read(
+                                              targetSecondsProvider.notifier,
+                                            )
+                                            .state =
+                                            TargetSeconds.clamp(seconds);
+                                      },
+                                      onEdit: CustomPlankTypeMapper
+                                              .isCustomPlankTypeId(
+                                            plankTypes[i].id,
                                           )
-                                      : null,
-                                ),
-                              AddCustomPlankTypePanel(
-                                onAdd: () => _openCustomPlankEditor(),
-                              ),
-                              PlankSetDetailPanel(
-                                setName: officialSet.name,
-                                plankTypes: officialSetTypes,
-                                targetSecondsByPlankId: officialSetSeconds,
-                                onTargetSecondsChanged: (plankId, seconds) {
-                                  ref
-                                      .read(
-                                        plankSetTargetSecondsProvider.notifier,
-                                      )
-                                      .state = {
-                                    ...officialSetSeconds,
-                                    plankId: TargetSeconds.clamp(seconds),
-                                  };
-                                },
-                              ),
-                              for (final set in customSets)
-                                CustomPlankSetCarouselPanel(
-                                  set: set,
-                                  onEdit: () => _openCustomPlankSetEditor(
-                                    existingSetId: set.id,
+                                          ? () => _openCustomPlankEditor(
+                                                existingId: plankTypes[i].id,
+                                              )
+                                          : null,
+                                    ),
+                                  AddCustomPlankTypePanel(
+                                    onAdd: () => _openCustomPlankEditor(),
                                   ),
-                                  onTargetSecondsChanged: (plankId, seconds) {
-                                    _updateCustomSetSeconds(
-                                      set.id,
-                                      plankId,
-                                      seconds,
-                                    );
-                                  },
-                                ),
-                              AddCustomPlankSetPanel(
-                                onAdd: () => _openCustomPlankSetEditor(),
+                                ],
+                              ),
+                              PageView(
+                                controller: _setPageController,
+                                scrollDirection: Axis.vertical,
+                                physics: const ClampingScrollPhysics(),
+                                onPageChanged: (page) {
+                                  setState(() => _setVerticalPage = page);
+                                },
+                                children: [
+                                  PlankSetDetailPanel(
+                                    setName: officialSet.name,
+                                    plankTypes: officialSetTypes,
+                                    targetSecondsByPlankId: officialSetSeconds,
+                                    onTargetSecondsChanged: (plankId, seconds) {
+                                      ref
+                                          .read(
+                                            plankSetTargetSecondsProvider
+                                                .notifier,
+                                          )
+                                          .state = {
+                                        ...officialSetSeconds,
+                                        plankId: TargetSeconds.clamp(seconds),
+                                      };
+                                    },
+                                  ),
+                                  for (final set in customSets)
+                                    CustomPlankSetCarouselPanel(
+                                      set: set,
+                                      onEdit: () => _openCustomPlankSetEditor(
+                                        existingSetId: set.id,
+                                      ),
+                                      onTargetSecondsChanged:
+                                          (plankId, seconds) {
+                                        _updateCustomSetSeconds(
+                                          set.id,
+                                          plankId,
+                                          seconds,
+                                        );
+                                      },
+                                    ),
+                                  AddCustomPlankSetPanel(
+                                    onAdd: () => _openCustomPlankSetEditor(),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                         HomeNavArrowButton(
                           icon: Icons.chevron_right,
-                          onPressed: _onNextPage(exercisePageCount),
+                          onPressed: _onNextHorizontal(),
                         ),
                       ],
                     ),
-                    if (isExercisePage) ...[
+                    if (isSelectionSection) ...[
                       Positioned(
                         top: 4,
                         left: 0,
                         right: 0,
                         child: Center(
                           child: Text(
-                            "種目を選ぶ",
+                            isPlankSection ? "種目を選ぶ" : "セットを選ぶ",
                             textAlign: TextAlign.center,
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 48,
+                        right: 48,
+                        top: 44,
+                        bottom: 120,
+                        child: VerticalScrollHint(
+                          currentIndex: verticalSelectedIndex,
+                          pageCount: verticalPageCount,
                         ),
                       ),
                       Positioned(
@@ -379,12 +440,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const SizedBox(height: 8),
-                              CarouselIndicator(
-                                count: exercisePageCount,
-                                selectedIndex: activeCarouselIndex,
-                                onDotTap: (index) => _goToPage(index + 1),
-                              ),
-                              const SizedBox(height: 12),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -393,44 +448,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   width: double.infinity,
                                   height: 52,
                                   child: FilledButton.icon(
-                                    onPressed: () async {
-                                      if (isAddPlankPage) {
-                                        _openCustomPlankEditor();
-                                      } else if (isAddSetPage) {
-                                        _openCustomPlankSetEditor();
-                                      } else if (isOfficialSetPage) {
-                                        await _startPlankSet(
-                                          plankSet: officialSet,
-                                          plankTypes: officialSetTypes,
-                                          secondsByPlankId: officialSetSeconds,
-                                        );
-                                      } else if (activeCustomSet != null) {
-                                        final types =
-                                            CustomPlankSetCarouselPanel
-                                                .resolvePlankTypes(
-                                          plankTypes,
-                                          activeCustomSet,
-                                        );
-                                        await _startPlankSet(
-                                          plankSet:
-                                              activeCustomSet.toDefinition(),
-                                          plankTypes: types,
-                                          secondsByPlankId:
-                                              _secondsForCustomSet(
-                                            activeCustomSet,
-                                          ),
-                                        );
-                                      } else if (activePlank != null) {
-                                        final seconds = TargetSeconds.clamp(
-                                          ref.read(targetSecondsProvider) ??
-                                              activePlank.defaultSeconds,
-                                        );
-                                        await _startPlank(
-                                          activePlank,
-                                          seconds,
-                                        );
-                                      }
-                                    },
+                                    onPressed: () => _onStartPressed(
+                                      plankTypes: plankTypes,
+                                      plankCount: plankCount,
+                                      customSets: customSets,
+                                      officialSet: officialSet,
+                                      officialSetTypes: officialSetTypes,
+                                      officialSetSeconds: officialSetSeconds,
+                                    ),
                                     icon: Icon(
                                       isAddPlankPage || isAddSetPage
                                           ? Icons.add
