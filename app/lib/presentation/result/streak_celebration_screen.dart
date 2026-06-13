@@ -26,8 +26,6 @@ class StreakCelebrationScreen extends ConsumerStatefulWidget {
 class _StreakCelebrationScreenState
     extends ConsumerState<StreakCelebrationScreen>
     with SingleTickerProviderStateMixin {
-  static const _characterImageAsset = "assets/character/kangaru1.png";
-
   late final AnimationController _controller;
   late final Animation<double> _plusScale;
   late final Animation<double> _countFade;
@@ -208,12 +206,6 @@ class _StreakCelebrationScreenState
                         ],
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Image.asset(
-                    _characterImageAsset,
-                    height: 140,
-                    fit: BoxFit.contain,
                   ),
                   const Spacer(),
                   Text(

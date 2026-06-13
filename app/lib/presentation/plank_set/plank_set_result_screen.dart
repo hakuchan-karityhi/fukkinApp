@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_set.dart";
 import "../widgets/exp_gain_progress_bar.dart";
+import "../widgets/result_character_greeting.dart";
 
 class PlankSetResultScreen extends ConsumerWidget {
   const PlankSetResultScreen({super.key, required this.result});
@@ -80,6 +81,8 @@ class PlankSetResultScreen extends ConsumerWidget {
                   ),
                 ),
               const Spacer(),
+              const ResultCharacterGreeting(),
+              const SizedBox(height: 16),
               Text(
                 "タップしてホームへ",
                 textAlign: TextAlign.center,

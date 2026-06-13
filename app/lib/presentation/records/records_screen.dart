@@ -45,6 +45,12 @@ class RecordsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            streakAsync.when(
+              data: (streak) => _StreakSummaryCard(streak: streak),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
             workoutDatesAsync.when(
               data: (dates) => MonthCalendar(
                 year: month.year,
@@ -73,12 +79,6 @@ class RecordsScreen extends ConsumerWidget {
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Text("カレンダーの読み込みに失敗: $error"),
-            ),
-            const SizedBox(height: 16),
-            streakAsync.when(
-              data: (streak) => _StreakSummaryCard(streak: streak),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             dayRecordsAsync.when(

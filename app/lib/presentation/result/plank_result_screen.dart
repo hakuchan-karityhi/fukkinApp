@@ -4,11 +4,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_result.dart";
 import "../widgets/exp_gain_progress_bar.dart";
+import "../widgets/result_character_greeting.dart";
 
 class PlankResultScreen extends ConsumerWidget {
   const PlankResultScreen({super.key, required this.result});
-
-  static const _characterImageAsset = "assets/character/kangaru1.png";
 
   final PlankResult result;
 
@@ -76,15 +75,9 @@ class PlankResultScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Center(
-                  child: Image.asset(
-                    _characterImageAsset,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
+              const Spacer(),
+              const ResultCharacterGreeting(),
+              const SizedBox(height: 16),
               Text(
                 "タップしてホームへ",
                 textAlign: TextAlign.center,
