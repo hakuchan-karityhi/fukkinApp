@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_set.dart";
 import "../widgets/exp_gain_progress_bar.dart";
+import "../widgets/exp_result_breakdown.dart";
 import "../widgets/result_character_greeting.dart";
 
 class PlankSetResultScreen extends ConsumerWidget {
@@ -29,58 +30,73 @@ class PlankSetResultScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                result.setName,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "セット完了！",
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                "完了！",
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               ExpGainProgressBar(
                 totalExpBefore: totalExpBefore,
                 totalExpAfter: result.totalExpAfter,
                 earnedExp: result.totalEarnedExp,
                 levelThresholds: thresholds,
               ),
-              const SizedBox(height: 16),
-              for (final plankResult in result.plankResults)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    "${plankResult.plankTypeName}: +${plankResult.earnedExp} EXP",
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  "合計: +${result.totalEarnedExp} EXP",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+              const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < result.plankResults.length; i++)
+                        ExpResultBreakdown(
+                          result: result.plankResults[i],
+                          showDivider: i > 0,
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "合計",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              "+${result.totalEarnedExp} EXP",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
+                      if (result.levelUp)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            "レベルアップ！ Lv ${result.levelAfter}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              if (result.levelUp)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    "レベルアップ！ Lv ${result.levelAfter}",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              const Spacer(),
               const ResultCharacterGreeting(),
               const SizedBox(height: 16),
               Text(

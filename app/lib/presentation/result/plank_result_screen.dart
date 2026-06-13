@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_result.dart";
 import "../widgets/exp_gain_progress_bar.dart";
+import "../widgets/exp_result_breakdown.dart";
 import "../widgets/result_character_greeting.dart";
 
 class PlankResultScreen extends ConsumerWidget {
@@ -29,40 +30,22 @@ class PlankResultScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                result.plankTypeName,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
                 "完了！",
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               ExpGainProgressBar(
                 totalExpBefore: totalExpBefore,
                 totalExpAfter: result.totalExpAfter,
                 earnedExp: result.earnedExp,
                 levelThresholds: thresholds,
               ),
-              const SizedBox(height: 16),
-              Text("基本EXP: ${result.baseExp}"),
-              if (result.repeatSessionBonusPercent > 0)
-                Text(
-                  "再実施（${result.sessionIndexOfDay}回目 "
-                  "+${result.repeatSessionBonusPercent}%）",
-                ),
-              if (result.dailyCapReached)
-                Text(
-                  "本日の獲得上限に達したため EXP が調整されました",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+              const SizedBox(height: 20),
+              ExpResultBreakdown(result: result),
               if (result.levelUp)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
