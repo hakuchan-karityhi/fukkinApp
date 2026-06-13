@@ -17,14 +17,6 @@ final _selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
-final _monthWorkoutDatesProvider =
-    FutureProvider.family<Set<DateTime>, DateTime>((ref, month) async {
-  return ref.watch(workoutRepositoryProvider).getWorkoutDatesInMonth(
-        month.year,
-        month.month,
-      );
-});
-
 class RecordsScreen extends ConsumerWidget {
   const RecordsScreen({super.key});
 
@@ -35,7 +27,7 @@ class RecordsScreen extends ConsumerWidget {
     final streakAsync = ref.watch(streakStateProvider);
     final targetsAsync = ref.watch(milestoneTargetsProvider);
     final achievementsAsync = ref.watch(milestoneAchievementsProvider);
-    final workoutDatesAsync = ref.watch(_monthWorkoutDatesProvider(month));
+    final workoutDatesAsync = ref.watch(monthWorkoutDatesProvider(month));
     final dayRecordsAsync =
         ref.watch(workoutRecordsByDateProvider(selectedDate));
     final plankTypesAsync = ref.watch(plankTypesProvider);
@@ -47,7 +39,7 @@ class RecordsScreen extends ConsumerWidget {
           ref.invalidate(streakStateProvider);
           ref.invalidate(milestoneTargetsProvider);
           ref.invalidate(milestoneAchievementsProvider);
-          ref.invalidate(_monthWorkoutDatesProvider(month));
+          ref.invalidate(monthWorkoutDatesProvider(month));
           ref.invalidate(workoutRecordsByDateProvider(selectedDate));
         },
         child: ListView(

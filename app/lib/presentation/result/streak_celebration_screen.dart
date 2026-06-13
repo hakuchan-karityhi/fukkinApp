@@ -1,33 +1,45 @@
 import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 
-class StreakCelebrationScreen extends StatefulWidget {
+import "../../app/providers.dart";
+import "widgets/streak_calendar_stamp.dart";
+
+class StreakCelebrationScreen extends ConsumerStatefulWidget {
   const StreakCelebrationScreen({
     super.key,
     required this.streakAfter,
     required this.streakIncreased,
     required this.nextScreen,
+    this.completedDate,
   });
 
   final int streakAfter;
   final bool streakIncreased;
   final Widget nextScreen;
+  final DateTime? completedDate;
 
   @override
-  State<StreakCelebrationScreen> createState() =>
+  ConsumerState<StreakCelebrationScreen> createState() =>
       _StreakCelebrationScreenState();
 }
 
-class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
+class _StreakCelebrationScreenState
+    extends ConsumerState<StreakCelebrationScreen>
     with SingleTickerProviderStateMixin {
   static const _characterImageAsset = "assets/character/kangaru1.png";
 
   late final AnimationController _controller;
   late final Animation<double> _plusScale;
   late final Animation<double> _countFade;
+  late final DateTime _completedDate;
 
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    _completedDate = widget.completedDate ??
+        DateTime(now.year, now.month, now.day);
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -75,6 +87,8 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final streakIncreased = widget.streakIncreased;
+    final month = DateTime(_completedDate.year, _completedDate.month);
+    final workoutDatesAsync = ref.watch(monthWorkoutDatesProvider(month));
 
     return Scaffold(
       body: GestureDetector(
@@ -122,7 +136,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
                       "ストリーク更新！",
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -132,10 +146,10 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                   ] else ...[
                     Icon(
                       Icons.check_circle_outline,
-                      size: 72,
+                      size: 56,
                       color: colorScheme.primary,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       "今日も完了！",
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -143,6 +157,22 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                           ),
                     ),
                   ],
+                  const SizedBox(height: 16),
+                  workoutDatesAsync.when(
+                    data: (dates) => StreakCalendarStamp(
+                      year: month.year,
+                      month: month.month,
+                      workoutDates: dates,
+                      stampDate: _completedDate,
+                    ),
+                    loading: () => const SizedBox(
+                      height: 220,
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
                   const SizedBox(height: 16),
                   FadeTransition(
                     opacity: streakIncreased
@@ -179,10 +209,10 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Image.asset(
                     _characterImageAsset,
-                    height: 180,
+                    height: 140,
                     fit: BoxFit.contain,
                   ),
                   const Spacer(),
@@ -208,6 +238,7 @@ void openStreakCelebrationScreen(
   required int streakAfter,
   required bool streakIncreased,
   required Widget nextScreen,
+  DateTime? completedDate,
 }) {
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
@@ -215,6 +246,7 @@ void openStreakCelebrationScreen(
         streakAfter: streakAfter,
         streakIncreased: streakIncreased,
         nextScreen: nextScreen,
+        completedDate: completedDate,
       ),
     ),
   );

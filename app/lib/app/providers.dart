@@ -216,6 +216,14 @@ final streakStateProvider = FutureProvider<StreakState>((ref) async {
   return ref.watch(streakRepositoryProvider).get();
 });
 
+final monthWorkoutDatesProvider =
+    FutureProvider.family<Set<DateTime>, DateTime>((ref, month) async {
+  return ref.watch(workoutRepositoryProvider).getWorkoutDatesInMonth(
+        month.year,
+        month.month,
+      );
+});
+
 final completePlankUseCaseProvider = Provider<CompletePlankUseCase?>((ref) {
   final expCalculator = ref.watch(expCalculatorProvider);
   final streakService = ref.watch(streakServiceProvider);
