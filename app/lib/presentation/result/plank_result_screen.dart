@@ -4,7 +4,6 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "../../app/providers.dart";
 import "../../domain/models/plank_result.dart";
 import "../widgets/exp_gain_progress_bar.dart";
-import "streak_celebration_screen.dart";
 
 class PlankResultScreen extends ConsumerWidget {
   const PlankResultScreen({super.key, required this.result});
@@ -24,11 +23,7 @@ class PlankResultScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text("結果")),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => openStreakCelebrationScreen(
-          context,
-          streakAfter: result.streakAfter,
-          streakIncreased: result.streakIncreased,
-        ),
+        onTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -91,7 +86,7 @@ class PlankResultScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                "タップして続ける",
+                "タップしてホームへ",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,

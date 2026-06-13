@@ -9,6 +9,7 @@ import "../../domain/models/plank_type.dart";
 import "../plank_session/plank_exercise_timer.dart";
 import "../plank_session/plank_session_header.dart";
 import "../widgets/plank_pose_view.dart";
+import "../result/streak_celebration_screen.dart";
 import "plank_set_result_screen.dart";
 
 class PlankSetSessionScreen extends ConsumerStatefulWidget {
@@ -117,7 +118,11 @@ class _PlankSetSessionScreenState extends ConsumerState<PlankSetSessionScreen> {
 
     await Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => PlankSetResultScreen(result: setResult),
+        builder: (_) => StreakCelebrationScreen(
+          streakAfter: setResult.streakAfter,
+          streakIncreased: setResult.streakIncreased,
+          nextScreen: PlankSetResultScreen(result: setResult),
+        ),
       ),
     );
   }

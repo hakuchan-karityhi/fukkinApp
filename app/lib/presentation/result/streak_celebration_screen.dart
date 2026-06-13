@@ -5,10 +5,12 @@ class StreakCelebrationScreen extends StatefulWidget {
     super.key,
     required this.streakAfter,
     required this.streakIncreased,
+    required this.nextScreen,
   });
 
   final int streakAfter;
   final bool streakIncreased;
+  final Widget nextScreen;
 
   @override
   State<StreakCelebrationScreen> createState() =>
@@ -58,8 +60,10 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     super.dispose();
   }
 
-  void _goHome() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  void _goNext() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => widget.nextScreen),
+    );
   }
 
   int get _displayStreakBefore =>
@@ -75,7 +79,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     return Scaffold(
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _goHome,
+        onTap: _goNext,
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -183,7 +187,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                   ),
                   const Spacer(),
                   Text(
-                    "タップしてホームへ",
+                    "タップして続ける",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -203,12 +207,14 @@ void openStreakCelebrationScreen(
   BuildContext context, {
   required int streakAfter,
   required bool streakIncreased,
+  required Widget nextScreen,
 }) {
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
       builder: (_) => StreakCelebrationScreen(
         streakAfter: streakAfter,
         streakIncreased: streakIncreased,
+        nextScreen: nextScreen,
       ),
     ),
   );
